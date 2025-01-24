@@ -328,7 +328,7 @@ def crawlNewFeed(account,name,dirextension,stop_event=None,system_account=None):
                 while not stop_event.is_set():
                     try:
                         manager = Browser(pathProfile,dirextension)
-                        browser = manager.start(False)
+                        browser = manager.start()
                         sleep(5)
                         break
                     except Exception as e:

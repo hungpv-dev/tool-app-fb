@@ -55,13 +55,14 @@ class Browser:
             chrome_options.add_argument("--incognito")
 
         headlessConfig = config('headless')
-        if not headlessConfig:
-            chrome_options.add_argument("--headless=new")
-            chrome_options.add_argument("--no-sandbox")
-            chrome_options.add_argument("--disable-gpu")
-            chrome_options.add_argument("--enable-unsafe-swiftshader")
-            chrome_options.add_argument("--disable-webgl")
-            chrome_options.add_argument("--use-gl=swiftshader")
+        if headless:
+            if not headlessConfig:
+                chrome_options.add_argument("--headless=new")
+                chrome_options.add_argument("--no-sandbox")
+                chrome_options.add_argument("--disable-gpu")
+                chrome_options.add_argument("--enable-unsafe-swiftshader")
+                chrome_options.add_argument("--disable-webgl")
+                chrome_options.add_argument("--use-gl=swiftshader")
         
         if not self.loadContent:
             prefs = {
