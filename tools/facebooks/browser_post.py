@@ -8,6 +8,8 @@ import logging
 from main.post import get_post_process_instance
 from sql.system import System
 from bot import send
+from helpers.global_value import get_global_theard_event
+global_theard_event = get_global_theard_event()
 
 account_instance = Account()
 error_instance = Error()
@@ -25,7 +27,7 @@ def process_post(account,stop_event):
     post_process_instance.update_process(account.get('id'),'Bắt đầu')
     logging.info(f'=========={account["name"]}============')
     print(f'=========={account["name"]}============')
-    while not stop_event.is_set():
+    while not stop_event.is_set() and not global_theard_event.is_set():
         checkProxy = True
         dirextension = None
         proxy = account.get('proxy')

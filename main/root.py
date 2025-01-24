@@ -1,10 +1,8 @@
 import tkinter as tk
-import threading
 
 # Biến giữ instance của root
 root_instance = None
 main_frame = None
-global_theard_event = None
 
 def create_app():
     """Tạo cửa sổ ứng dụng chính."""
@@ -31,9 +29,3 @@ def get_frame():
         main_frame = tk.Frame(root, bg="#f0f2f5")
         main_frame.pack(fill=tk.BOTH, expand=True)
     return main_frame
-
-def get_global_theard_event():
-    global global_theard_event 
-    if global_theard_event is None:
-        global_theard_event = threading.Event()
-    return global_theard_event

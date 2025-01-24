@@ -17,6 +17,9 @@ newsfeed_process_instance = get_newsfeed_process_instance()
 
 
 def process_newsfeed(account, stop_event):
+    from helpers.global_value import get_global_theard_event
+    global_theard_event = get_global_theard_event()
+
     browser = None
     manager = None
     system_account = system_instance.create_account({
@@ -28,7 +31,7 @@ def process_newsfeed(account, stop_event):
     print(f'=========={account["name"]}============')
     newsfeed_process_instance.update_process(account.get('id'),'Bắt đầu')
 
-    while not stop_event.is_set():
+    while not stop_event.is_set() and not global_theard_event.is_set():
         checkProxy = True
         extension = None
         proxy = account.get('proxy')

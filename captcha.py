@@ -9,6 +9,8 @@ class Captcha:
         self.token = config('omocaptcha_token')
     
     def getCode(self, url):
+        from helpers.base import config
+        self.token = config('omocaptcha_token')
         base64Image = self.decodeBase64Img(url)
         print(f'Lấy cap cha từ: {url}')
         if base64Image is None:

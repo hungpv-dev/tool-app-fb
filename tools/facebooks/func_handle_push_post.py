@@ -11,6 +11,8 @@ from helpers.modal import clickOk
 from sql.account_cookies import AccountCookies
 import logging
 from bot import send
+from helpers.global_value import get_global_theard_event
+global_theard_event = get_global_theard_event()
 
 from main.post import get_post_process_instance
 post_process_instance = get_post_process_instance()
@@ -31,12 +33,12 @@ def push_page(page,account,dirextension,stop_event,system_account = None):
     account_instance = AccountCookies()
 
 
-    while not stop_event.is_set():
+    while not stop_event.is_set() and not global_theard_event.is_set():
         manager = None
         browser = None
         loginInstance = None
         try:
-            while not stop_event.is_set():
+            while not stop_event.is_set() and not global_theard_event.is_set():
                 try:
                     manager = Browser(pathProfile,dirextension,'chrome',False,loadContent=True)
                     browser = manager.start()
@@ -49,7 +51,7 @@ def push_page(page,account,dirextension,stop_event,system_account = None):
                     sleep(30)
 
             loginInstance = HandleLogin(browser,account)
-            while not stop_event.is_set():
+            while not stop_event.is_set() and not global_theard_event.is_set():
                 try:
                     checkLogin = loginInstance.loginFacebook()
                     if checkLogin == False:
@@ -78,7 +80,7 @@ def push_page(page,account,dirextension,stop_event,system_account = None):
             print(f'Bắt đầu theo dõi page: {name}')
             updateSystemMessage(system_account,f'Bắt đầu đăng page: {name}')
             retry_count = {}
-            while not stop_event.is_set():
+            while not stop_event.is_set() and not global_theard_event.is_set():
                 cookie = account.get('latest_cookie')
                 pageUP = page_post_instance.get_page_up({'page_id': page["id"],'account_id':account['id']})
                 if pageUP:
@@ -152,14 +154,14 @@ def push_list(account,dirextension,stop_event,system_account = None):
     manager = None
     browser = None
     loginInstance = None
-    while not stop_event.is_set():
+    while not stop_event.is_set() and not global_theard_event.is_set():
         retry_count = {}
         try:
             manager = Browser(pathProfile,dirextension,'chrome',loadContent=True)
             browser = manager.start()
             loginInstance = HandleLogin(browser,account)
             sleep(3)
-            while not stop_event.is_set():
+            while not stop_event.is_set() and not global_theard_event.is_set():
                 try:
                     checkLogin = loginInstance.loginFacebook()
                     if checkLogin == False:
@@ -179,7 +181,7 @@ def push_list(account,dirextension,stop_event,system_account = None):
                     sleep(60)
             sleep(2)
             push = Push(browser,account,dirextension,manager)
-            while not stop_event.is_set():
+            while not stop_event.is_set() and not global_theard_event.is_set():
                 posts = browseTime(account)
                 logging.error(f"{account.get('name')} => đăng: {len(posts)} bài viết")
                 print(f"{account.get('name')} => đăng: {len(posts)} bài viết")

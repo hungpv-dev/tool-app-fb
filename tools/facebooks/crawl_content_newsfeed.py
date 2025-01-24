@@ -20,7 +20,8 @@ from helpers.modal import openProfile,remove_notifications,clickOk
 system_instance = System()
 from bot import send
 from main.newsfeed import get_newsfeed_process_instance
-
+from helpers.global_value import get_global_theard_event
+global_theard_event = get_global_theard_event()
 newsfeed_process_instance = get_newsfeed_process_instance()
 
 class CrawContentNewsfeed:
@@ -38,7 +39,7 @@ class CrawContentNewsfeed:
     def handle(self,stop_event):
         loginInstance = HandleLogin(self.browser,self.account,newsfeed_process_instance)
         sendNoti = True
-        while not stop_event.is_set():
+        while not stop_event.is_set() and not global_theard_event.is_set():
             try:
                 newsfeed_process_instance.update_process(self.account.get('id'),'Bắt đầu đăng nhập')
                 # log_newsfeed(self.account,f'* Bắt đầu ({self.account["name"]}) *')

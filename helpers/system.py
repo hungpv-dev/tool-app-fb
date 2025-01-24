@@ -9,6 +9,8 @@ from threading import Thread
 import shutil
 import json
 from sql.system import System
+from helpers.global_value import get_global_theard_event
+global_theard_event = get_global_theard_event()
 
 def get_system_info():
     try:
@@ -43,6 +45,7 @@ def init_system():
     system = system_instance.insert({'info': info})
 
 def close_system():
+    global_theard_event.set()
     system = get_system()
     system_instance.update(system.get('id'),{'status': 2})
 

@@ -27,6 +27,8 @@ from sql.system import System
 system_instance = System()
 post_process_instance = get_post_process_instance()
 from bot import send
+from helpers.global_value import get_global_theard_event
+global_theard_event = get_global_theard_event()
 
 class Push:
     def __init__(self,browser,account,dirextension,manager,system_account = None):
@@ -47,7 +49,7 @@ class Push:
     def handle(self,stop_event):
         loginInstance = HandleLogin(self.browser,self.account,post_process_instance)
         sendNoti = True
-        while not stop_event.is_set():
+        while not stop_event.is_set() and not global_theard_event.is_set():
             try:
                 post_process_instance.update_process(self.account.get('id'),'Bắt đầu đăng nhập')
                 logging.error(f'==================Push ({self.account["name"]})================')

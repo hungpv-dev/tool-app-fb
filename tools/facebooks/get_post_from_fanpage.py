@@ -6,7 +6,8 @@ from main.fanpage import get_fanpage_process_instance
 from sql.errors import Error
 import logging
 from bot import send
-
+from helpers.global_value import get_global_theard_event
+global_theard_event = get_global_theard_event()
 fanpage_process_instance = get_fanpage_process_instance()
 
 def process_crawl(id, stop_event):
@@ -14,7 +15,7 @@ def process_crawl(id, stop_event):
     browser = None
     manager = None
     fanpage_process_instance.update_process(id,'Đang mở tab....')
-    while not stop_event.is_set(): 
+    while not stop_event.is_set() and not global_theard_event.is_set(): 
         try:
             manager = Browser('/crawl',None,'chrome',True)
             browser = manager.start()

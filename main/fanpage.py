@@ -61,6 +61,7 @@ class FanpageProcess:
             if id in self.progress_data:
                 process = self.progress_data[id]
                 process['status_process'] = 2
+                process["status_show"] = process["status_show"]
                 stop_event = process.get('stop_event')
 
                 if stop_event:

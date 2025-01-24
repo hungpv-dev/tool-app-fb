@@ -20,6 +20,8 @@ from bot import send
 import logging
 from helpers.modal import closeModal,openProfile
 from selenium.common.exceptions import NoSuchElementException
+from helpers.global_value import get_global_theard_event
+global_theard_event = get_global_theard_event()
 
 from main.newsfeed import get_newsfeed_process_instance
 
@@ -40,7 +42,7 @@ def handleCrawlNewFeedVie(account, managerDriver,dirextension = None, stop_event
     manager = managerDriver.get('manager')
     browser = managerDriver.get('browser')
     init = True
-    while not stop_event.is_set():
+    while not stop_event.is_set() and not global_theard_event.is_set():
         try:
             if not init:
                 manager = Browser(f"/newsfeed/home/{account['id']}",dirextension)
@@ -48,14 +50,14 @@ def handleCrawlNewFeedVie(account, managerDriver,dirextension = None, stop_event
             else:
                 init = False
                 
-            while not stop_event.is_set():
+            while not stop_event.is_set() and not global_theard_event.is_set():
                 if process['status_vie'] == 1:
                     sleep(30)
                     process = newsfeed_process_instance.show(account.get('id'))
                     continue
 
                 loginInstance = HandleLogin(browser,account)
-                while not stop_event.is_set():
+                while not stop_event.is_set() and not global_theard_event.is_set():
                     checkLogin = loginInstance.loginFacebook()
                     if checkLogin == False:
                         print('Đợi 1p rồi thử login lại!')
@@ -73,7 +75,7 @@ def handleCrawlNewFeedVie(account, managerDriver,dirextension = None, stop_event
                 sleep(3)
                 listId = set() 
                 # log_newsfeed(account,f"====================Thực thi cào fanpage {name}=====================")
-                while not stop_event.is_set() and process['status_vie'] == 2: 
+                while not stop_event.is_set() and not global_theard_event.is_set() and process['status_vie'] == 2: 
                     updateSystemMessage(system_account,'Bắt đầu cào vie')
                     try:
                         clickOk(browser)
@@ -119,6 +121,7 @@ def handleCrawlNewFeedVie(account, managerDriver,dirextension = None, stop_event
                                             }
                                             res = newfeed_instance.insert(data)
                                             print(f"{account.get('name')}: {data.get('post_fb_link')}")
+                                            newsfeed_process_instance.update_process(account.get('id'),'Lưu được 1 đường dẫn bài viết')
                                             # log_newsfeed(account, f"* +1 đường dẫn * {str(res.get('data', {}).get('id', 'Không có id'))}")
 
                         except Exception as e:
@@ -164,9 +167,9 @@ def handleCrawlNewFeed(account, name, dirextension = None,stop_event=None,system
         manager = None
         browser = None
         sendNoti = True
-        while not stop_event.is_set():
+        while not stop_event.is_set() and not global_theard_event.is_set():
             try:
-                while not stop_event.is_set():
+                while not stop_event.is_set() and not global_theard_event.is_set():
                     try:
                         manager = Browser(pathProfile,dirextension)
                         browser = manager.start()
@@ -178,7 +181,7 @@ def handleCrawlNewFeed(account, name, dirextension = None,stop_event=None,system
                 
                 loginInstance = HandleLogin(browser,account)
 
-                while not stop_event.is_set():
+                while not stop_event.is_set() and not global_theard_event.is_set():
                     checkLogin = loginInstance.loginFacebook()
                     if checkLogin == False:
                         updateSystemMessage(system_account,'Login thất bại')
@@ -229,7 +232,7 @@ def handleCrawlNewFeed(account, name, dirextension = None,stop_event=None,system
                 sleep(3)
                 listId = set() 
                 # log_newsfeed(account,f"====================Thực thi cào fanpage {name}=====================")
-                while not stop_event.is_set(): 
+                while not stop_event.is_set() and not global_theard_event.is_set(): 
                     try:
                         clickOk(browser)
                         profile_button = browser.find_element(By.XPATH, push['openProfile'])
@@ -277,6 +280,7 @@ def handleCrawlNewFeed(account, name, dirextension = None,stop_event=None,system
                                                 'account_id': account.get('id'),
                                             }
                                             res = newfeed_instance.insert(data)
+                                            newsfeed_process_instance.update_process(account.get('id'),'Lưu được 1 đường dẫn bài viết')
                                             print(f"{name}: {data.get('post_fb_link')}")
                                             # log_newsfeed(account, f"* +1 đường dẫn * {str(res.get('data', {}).get('id', 'Không có id'))}")
 
@@ -323,9 +327,9 @@ def crawlNewFeed(account,name,dirextension,stop_event=None,system_account=None):
         print(f'Chuyển hướng tới fanpage: {name}')
         manager = None
         browser = None
-        while not stop_event.is_set():
+        while not stop_event.is_set() and not global_theard_event.is_set():
             try:
-                while not stop_event.is_set():
+                while not stop_event.is_set() and not global_theard_event.is_set():
                     try:
                         manager = Browser(pathProfile,dirextension)
                         browser = manager.start()
@@ -337,7 +341,7 @@ def crawlNewFeed(account,name,dirextension,stop_event=None,system_account=None):
                 
                 loginInstance = HandleLogin(browser,account)
 
-                while not stop_event.is_set():
+                while not stop_event.is_set() and not global_theard_event.is_set():
                     checkLogin = loginInstance.loginFacebook()
                     if checkLogin == False:
                         updateSystemMessage(system_account,'Login thất bại')
@@ -381,7 +385,7 @@ def crawlNewFeed(account,name,dirextension,stop_event=None,system_account=None):
                 sleep(2)
                 crawl_instance = CrawlContentPost(browser)
                 # log_newsfeed(account,f"==> Lưu bài viết <==")
-                while not stop_event.is_set():
+                while not stop_event.is_set() and not global_theard_event.is_set():
                     try:
                         clickOk(browser)
                         profile_button = browser.find_element(By.XPATH, push['openProfile'])
@@ -445,12 +449,14 @@ def crawlNewFeed(account,name,dirextension,stop_event=None,system_account=None):
                                 'link': post.get('link_facebook'),
                                 'icon': post.get('icon'),
                             },indent=4))
+                            newsfeed_process_instance.update_process(account.get('id'),f'Lưu được 1 bài viết: {id}')
                             crawl_instance.viewImages(post)
                             crawl_instance.insertPostAndComment(post,comments,{},id)
                             account_cookie_instance.updateCount(account['latest_cookie']['id'], 'count_get')
                             browser.get('https://facebook.com')
                             sleep(2)
                         else:
+                            newsfeed_process_instance.update_process(account.get('id'),f'{id} bài viết không chứa từ khoá')
                             print('Bài này k thỏa mã yêu cầu!')
                             newfeed_instance.destroy(id)
                         sleep(2)

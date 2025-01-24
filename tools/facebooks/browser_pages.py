@@ -14,6 +14,8 @@ from helpers.fb import clean_url_keep_params
 import logging
 from helpers.time import convert_to_db_format
 from main.fanpage import get_fanpage_process_instance
+from helpers.global_value import get_global_theard_event
+global_theard_event = get_global_theard_event()
 
 fanpage_process_instance = get_fanpage_process_instance()
 
@@ -28,7 +30,7 @@ class BrowserFanpage:
 
     def handle(self,tab_id,stop_event):
         fanpage_process_instance.update_process(tab_id,'Bắt đầu thực thi....')
-        while not stop_event.is_set():
+        while not stop_event.is_set() and not global_theard_event.is_set():
             try:
                 fanpage_process_instance.update_process(tab_id,'Bắt đầu cào page')
                 self.crawl(tab_id,stop_event)
@@ -153,7 +155,7 @@ class BrowserFanpage:
         sleep(3)
 
     def updateInfoFanpage(self, page,stop_event):
-        while not stop_event.is_set():
+        while not stop_event.is_set() and not global_theard_event.is_set():
             dataUpdatePage = {}
             try:
                 name_page = self.browser.find_element(By.XPATH, '(//h1)[last()]')
