@@ -83,6 +83,12 @@ def push_page(page,account,dirextension,stop_event,system_account = None):
             while not stop_event.is_set() and not global_theard_event.is_set():
                 cookie = account.get('latest_cookie')
                 pageUP = page_post_instance.get_page_up({'page_id': page["id"],'account_id':account['id']})
+
+                if browser is None or not browser.service.is_connectable():
+                    print("Trình duyệt đã bị đóng. Khởi chạy lại...")
+                    manager = Browser(pathProfile, dirextension)
+                    browser = manager.start()
+                
                 if pageUP:
                     pot_id = pageUP.get('id')
                     if pot_id not in retry_count:
@@ -139,6 +145,8 @@ def push_page(page,account,dirextension,stop_event,system_account = None):
             if browser:
                 browser.quit()
                 manager.cleanup()
+            browser = None
+            manager = None
 
 
 def browseTime(account):
@@ -182,6 +190,12 @@ def push_list(account,dirextension,stop_event,system_account = None):
             sleep(2)
             push = Push(browser,account,dirextension,manager)
             while not stop_event.is_set() and not global_theard_event.is_set():
+
+                if browser is None or not browser.service.is_connectable():
+                    print("Trình duyệt đã bị đóng. Khởi chạy lại...")
+                    manager = Browser(pathProfile, dirextension)
+                    browser = manager.start()
+                
                 posts = browseTime(account)
                 logging.error(f"{account.get('name')} => đăng: {len(posts)} bài viết")
                 print(f"{account.get('name')} => đăng: {len(posts)} bài viết")
@@ -241,6 +255,8 @@ def push_list(account,dirextension,stop_event,system_account = None):
             if browser:
                 browser.quit()
                 manager.cleanup()
+            browser = None
+            manager = None
             logging.error('Lỗi khi đăng bài time,thử lại sau 30s')
             print('Lỗi khi đăng bài time,thử lại sau 30s')
             sleep(30)

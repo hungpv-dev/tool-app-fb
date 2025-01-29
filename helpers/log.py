@@ -1,7 +1,7 @@
 import logging
 import os
 
-def config_log(log_dir='./temp/logs', log_filename='error.log', max_lines=1000):
+def config_log(log_dir='./temp/logs', log_filename='error.log', max_lines=3000):
     """
     Cấu hình log cho ứng dụng và tự động xử lý khi vượt quá số dòng quy định.
     log_dir: Thư mục lưu trữ log.
