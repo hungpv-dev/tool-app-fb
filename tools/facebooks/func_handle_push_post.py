@@ -53,7 +53,7 @@ def push_page(page,account,dirextension,stop_event,system_account = None):
             loginInstance = HandleLogin(browser,account)
             while not stop_event.is_set() and not global_theard_event.is_set():
                 try:
-                    checkLogin = loginInstance.loginFacebook()
+                    checkLogin = loginInstance.loginFacebook(False)
                     if checkLogin == False:
                         updateSystemMessage(system_account,'Login thất bại')
                         post_process_instance.update_process(account.get('id'),'Không login được, đợi 1p')
@@ -171,7 +171,7 @@ def push_list(account,dirextension,stop_event,system_account = None):
             sleep(3)
             while not stop_event.is_set() and not global_theard_event.is_set():
                 try:
-                    checkLogin = loginInstance.loginFacebook()
+                    checkLogin = loginInstance.loginFacebook(False)
                     if checkLogin == False:
                         post_process_instance.update_process(account.get('id'),'Không login được, đợi 1p')
                         updateSystemMessage(system_account,'Login thất bại')

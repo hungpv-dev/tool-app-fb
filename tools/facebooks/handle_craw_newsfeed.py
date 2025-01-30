@@ -62,7 +62,7 @@ def handleCrawlNewFeedVie(account, managerDriver,dirextension = None, stop_event
 
                 loginInstance = HandleLogin(browser,account,newsfeed_process_instance)
                 while not stop_event.is_set() and not global_theard_event.is_set():
-                    checkLogin = loginInstance.loginFacebook()
+                    checkLogin = loginInstance.loginFacebook(False)
                     if checkLogin == False:
                         print('Đợi 1p rồi thử login lại!')
                         updateSystemMessage(system_account,'Login thất bại')
@@ -184,7 +184,7 @@ def handleCrawlNewFeed(account, name, dirextension = None,stop_event=None,system
                 loginInstance = HandleLogin(browser,account,newsfeed_process_instance)
 
                 while not stop_event.is_set() and not global_theard_event.is_set():
-                    checkLogin = loginInstance.loginFacebook()
+                    checkLogin = loginInstance.loginFacebook(False)
                     if checkLogin == False:
                         updateSystemMessage(system_account,'Login thất bại')
                         print('Đợi 1p rồi thử login lại!')
@@ -326,7 +326,7 @@ def crawlNewFeed(account,name,dirextension,stop_event=None,system_account=None):
                 loginInstance = HandleLogin(browser,account,newsfeed_process_instance)
 
                 while not stop_event.is_set() and not global_theard_event.is_set():
-                    checkLogin = loginInstance.loginFacebook()
+                    checkLogin = loginInstance.loginFacebook(False)
                     if checkLogin == False:
                         updateSystemMessage(system_account,'Login thất bại')
                         print('Đợi 1p rồi thử login lại!')
