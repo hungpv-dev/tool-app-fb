@@ -80,6 +80,7 @@ class HandleLogin:
                 if check == False:
                     try:
                         self.toggleType('Authentication app')
+                        print('Chuyển hướng authen app')
                         authenapp = self.driver.find_element(
                             By.XPATH, "//*[contains(translate(text(), 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'), 'authentication app')]"
                         )
@@ -174,10 +175,24 @@ class HandleLogin:
 
     def toggleType(self,type):
         self.clickText('Try another way')
-        sleep(2)
+        print("Click try another way")
+        sleep(5)
         self.clickText(type)
+        print(f"Click {type}")
         sleep(2)
-        self.clickText('Continue')
+        try:
+            elements = self.driver.find_elements(By.XPATH, f"//*[contains(text(), 'Continue')]")
+            if len(elements) > 1:
+                targetElement = elements[1]
+            elif elements:
+                targetElement = elements[0]
+            WebDriverWait(self.driver, 3).until(
+                EC.element_to_be_clickable(targetElement)
+            )
+            self.driver.execute_script("arguments[0].scrollIntoView();", targetElement)
+            targetElement.click()
+        except Exception as e:
+            print(f'Không click được lastElement: {e}')
         sleep(5)
 
     def loginEmailAndGetCode(self):
@@ -345,34 +360,29 @@ class HandleLogin:
     
     def checkBlock(self):
         clickOk(self.driver)
-        try:
-            self.driver.find_element(By.XPATH, "//*[contains(text(), 'your account has been locked')]")
-            print('your account has been locked')
-            return True
-        except NoSuchElementException:
-            pass
-        
-        try:
-            self.driver.find_element(By.XPATH, "//*[contains(text(), 'Account locked')]")
-            print('Account locked')
-            return True
-        except NoSuchElementException:
-            pass
 
-        try:
-            self.driver.find_element(By.XPATH, "//*[contains(text(), 'You’re Temporarily Blocked')]")
-            print('You’re Temporarily Blocked')
-            return True
-        except NoSuchElementException:
-            pass
+        messages = [
+            "your account has been locked",
+            "We suspended your account",
+            "Account locked",
+            "You’re Temporarily Blocked"
+        ]
 
+        for mess in messages:
+            try:
+                self.driver.find_element(By.XPATH, f"//*[contains(text(), '{mess}')]")
+                print(f'{mess}')
+                return True
+            except NoSuchElementException:
+                continue
         return False
-
 
 
     def clickText(self,text):
         try:
-            element = self.driver.find_element(By.XPATH, f"//*[contains(text(), '{text}')]")
+            element = WebDriverWait(self.driver,5).until(
+                EC.presence_of_element_located((By.XPATH, f"//*[contains(text(), '{text}')]"))
+            )
             element.click()
         except NoSuchElementException as e:
             logging.error('No has element')
