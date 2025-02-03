@@ -74,6 +74,18 @@ def clean_facebook_url_redirect(url):
             return query_params['u'][0]
     return url
 
+def remove_params(url, param):
+    paserd_url = urlparse(url)
+    query_params = parse_qs(paserd_url.query)
+
+    if param in query_params:
+        del query_params[param]
+
+    new_query = urlencode(query_params, doseq=True)
+    cleaned_url = urlunparse(paserd_url._replace(query=new_query)) 
+
+    return cleaned_url
+
 import re
 def sanitize_text(text):
     # Lọc bỏ các ký tự nằm ngoài phạm vi BMP

@@ -122,7 +122,10 @@ class CrawlContentPost:
 
         self.modal = modal
 
-        data['content'] = extract_facebook_content(modal)
+        content, content_link = extract_facebook_content(modal)
+        content = f'Test: {content}'
+        data['content'] = content
+        data['content_link'] = content_link
 
         # Lấy ảnh và video
         media = None
@@ -447,7 +450,7 @@ class CrawlContentPost:
                         if isinstance(img, str): 
                             link = self.browser.find_element(By.XPATH, f"//img[@src='{img}']")
                             link.click()  
-                            sleep(5)
+                            sleep(3)
                             closeModal(0,self.browser)
                             sleep(1)
                             # Đóng các tab thừa nếu có
@@ -460,7 +463,7 @@ class CrawlContentPost:
                             logging.error(f"URL không hợp lệ: {img}")
                             print(f"URL không hợp lệ: {img}")
                     except Exception as e:
-                        sleep(5)
+                        sleep(3)
                         logging.error(f"Lỗi khi truy cập hình ảnh {img}: {e}")
                         print(f"Lỗi khi truy cập hình ảnh {img}: {e}")
         except Exception as e:
@@ -505,12 +508,32 @@ class CrawlContentPost:
 
 
 def extract_facebook_content(modal):
+    from helpers.fb import clean_facebook_url_redirect, remove_params
     try:
+        content_link = []
         content = modal.find_element(By.XPATH, types['content'])
+
+        replace_content = []
+        a_tags = content.find_elements(By.XPATH,'.//a')
+        for a in a_tags:
+            href = a.get_attribute('href')
+            if href:
+                clean_href = clean_facebook_url_redirect(href)
+                clean_href = remove_params(clean_href, 'fbclid')
+                content_link.append(clean_href)
+                text_link = a.text.strip()
+                replace_content.append({
+                    'text': text_link,
+                    'link': clean_href,
+                })
+
         contentText = content.text
+        for rep in replace_content:
+            contentText = contentText.replace(rep.get('text'), rep.get('link'))
+
         for string in removeString:
             contentText = contentText.replace(string, '')
-        return contentText.strip()
+        return contentText.strip(), content_link
     except Exception as e:
         logging.error(f'Không tìm thấy nội dung')
         print(f'Không tìm thấy nội dung')

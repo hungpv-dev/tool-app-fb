@@ -331,6 +331,7 @@ class HandleLogin:
         check = False
         try:
             checkBlock = self.checkBlock()
+            # print(f"Check block: {checkBlock}")
             if checkBlock:
                 if self.sendNoti:
                     send(f"Tài khoản: {self.account.get('name')} đã bị khoá")
@@ -370,6 +371,13 @@ class HandleLogin:
 
         for mess in messages:
             try:
+                if mess == "You’re Temporarily Blocked":
+                    try:
+                        self.driver.find_element(By.XPATH, push['openProfile'])
+                        self.driver.get('https://facebook.com/home.php')
+                    except NoSuchElementException:
+                        pass
+
                 self.driver.find_element(By.XPATH, f"//*[contains(text(), '{mess}')]")
                 print(f'{mess}')
                 return True

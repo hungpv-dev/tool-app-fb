@@ -337,29 +337,7 @@ def crawlNewFeed(account,name,dirextension,stop_event=None,system_account=None):
 
                 loginInstance.updateStatusAcount(account.get('id'),3)
                 sleep(2)
-                # try:
-                #     profile_button = browser.find_element(By.XPATH, push['openProfile'])
-                #     profile_button.click()
-                #     sleep(10)
-                # except Exception as e:
-                #     print(f"Không thể mở profile: {name}")
-                # sleep(1)
                 try:
-                    # try:
-                    #     # Chờ tối đa 10 giây để `allFanPage` xuất hiện và click
-                    #     allFanPage = WebDriverWait(browser, 10).until(
-                    #         EC.presence_of_element_located((By.XPATH, push['allProfile']))
-                    #     )
-                    #     allFanPage.click()
-                    # except Exception as e:
-                    #     pass
-
-                    # updateSystemMessage(system_account,f'Chuyển hướng page: {name}')
-                    # # Chờ tối đa 10 giây để `switchPage` xuất hiện và click
-                    # switchPage = WebDriverWait(browser, 10).until(
-                    #     EC.presence_of_element_located((By.XPATH, push['switchPage'](name)))
-                    # )
-                    # switchPage.click()
                     openProfile(browser,name)
                     sleep(10)
                 except Exception as e:
@@ -386,10 +364,11 @@ def crawlNewFeed(account,name,dirextension,stop_event=None,system_account=None):
                             continue
                         
                         id = up['id']
-                        browser.get(clean_url_keep_params(up['post_fb_link']))
+                        link_up = clean_url_keep_params(up['post_fb_link'])
+                        browser.get(link_up)
                         up['newfeed'] = 1
                         up['id'] = up['post_fb_id']
-                        up['link'] = up['post_fb_link']
+                        up['link'] = link_up
                         try:
                             data = crawl_instance.crawlContentPost({},up,{},newfeed=True)
                         except Exception as e:
@@ -397,7 +376,6 @@ def crawlNewFeed(account,name,dirextension,stop_event=None,system_account=None):
                             continue
 
                         check = False
-                        
                         post = data.get('post')
                         comments = data.get('comments')
                         try:
@@ -423,9 +401,9 @@ def crawlNewFeed(account,name,dirextension,stop_event=None,system_account=None):
                         # print(post.get('content'))
                         if check:
                             print('Đã lấy được 1 bài lưu db')
-                            crawl_instance.shareCopyLink()
-                            crawl_instance.sharePostAndOpenNotify()
-                            # icon = crawl_instance.likePost()
+                            # crawl_instance.shareCopyLink() -> Copy đường dẫn
+                            # crawl_instance.sharePostAndOpenNotify() -> Interested, Notifications, Save Post
+                            # icon = crawl_instance.likePost() -> Random icon post
                             # post['icon'] = icon
                             closeModal(crawl_instance.index,browser)
                             sleep(1)
@@ -437,13 +415,12 @@ def crawlNewFeed(account,name,dirextension,stop_event=None,system_account=None):
                             crawl_instance.viewImages(post)
                             crawl_instance.insertPostAndComment(post,comments,{},id)
                             account_cookie_instance.updateCount(account['latest_cookie']['id'], 'count_get')
-                            browser.get('https://facebook.com')
-                            sleep(2)
+                            # browser.get('https://facebook.com')
                         else:
                             newsfeed_process_instance.update_process(account.get('id'),f'{id} bài viết không chứa từ khoá')
                             print('Bài này k thỏa mã yêu cầu!')
                             newfeed_instance.destroy(id)
-                        sleep(2)
+                        sleep(1)
                     except Exception as e:
                         newfeed_instance.destroy(id)
             except Exception as e:
