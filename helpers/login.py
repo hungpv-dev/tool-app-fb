@@ -77,9 +77,14 @@ class HandleLogin:
 
                 self.updateMainModel('Login với username, password')
                 check = self.saveLogin()
+                print(f'Trạng thái login: {check}')
                 if check == False:
                     try:
-                        self.toggleType('Authentication app')
+                        print('Toggle Type Authen')
+                        try:
+                            self.toggleType('Authentication app')
+                        except Exception as e:
+                            pass
                         print('Chuyển hướng authen app')
                         authenapp = self.driver.find_element(
                             By.XPATH, "//*[contains(translate(text(), 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'), 'authentication app')]"
@@ -94,16 +99,23 @@ class HandleLogin:
                         check = self.pushCode(code)
                     except NoSuchElementException as e:
                         try:
+                            print('Get email')
                             self.driver.find_element(By.NAME,'email')
                             logging.info(f'{self.account.get("name")} lấy mã từ Outlook')
                             print(f'{self.account.get("name")} lấy mã từ Outlook')
                             try:
                                 self.updateMainModel('Login với Outlook')
-                                self.toggleType('Email') # Chuyển sang nhận mã từ email
+                                print('Chuyển hướng qua email')
+                                try:
+                                    self.toggleType('Email') # Chuyển sang nhận mã từ email
+                                except Exception as e:
+                                    pass 
+                                print('Lấy mã từ outlook')
                                 code = self.loginEmailAndGetCode() # Lấy code
                                 self.updateMainModel(f'Code là: {code}')
                                 check = self.pushCode(code)
                             except Exception as e:
+                                print(f'OUTLOOK: {e}')
                                 self.account_instance.update_account(self.account.get('id'),{'status_login':1})
                                 logging.error(f'{self.account.get("name")} lấy mã từ Audio (chiu)')
                                 print(f'{self.account.get("name")} lấy mã từ Audio (chiu)')

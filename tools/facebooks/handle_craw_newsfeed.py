@@ -232,6 +232,7 @@ def handleCrawlNewFeed(account, name, dirextension = None,stop_event=None,system
                                 print('Đợi 1p rồi thử login lại!')
                                 sleep(60)
                             else:
+                                send(f"Tài khoản {account.get('name')} ---- cào newsfeed: {name}!")
                                 break
                         sleep(2)
                     except Exception as e:

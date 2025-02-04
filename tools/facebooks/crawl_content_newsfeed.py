@@ -81,7 +81,6 @@ def process_fanpage(account, name, dirextension, stop_event, managerDriver,syste
     logging.info(f"Đang xử lý fanpage: {name}")
     print(f"Đang xử lý fanpage: {name}")
     threads = [
-        Thread(target=handleCrawlNewFeedVie, args=(account, managerDriver, dirextension, stop_event,system_account)),
         Thread(target=handleCrawlNewFeed, args=(account, name, dirextension, stop_event,system_account)),
         Thread(target=crawlNewFeed, args=(account, name, dirextension, stop_event,system_account)),
         Thread(target=crawlNewFeed, args=(account, name, dirextension, stop_event,system_account)),
@@ -138,6 +137,9 @@ class PageChecker:
             if allPages: 
                 names = []
                 newsfeed_process_instance.update_process(account.get('id'), f'Xử lý: {len(allPages)} page')
+                theardAccount = Thread(target=handleCrawlNewFeedVie, args=(account, managerDriver, self.dirextension, stop_event,self.system_account))
+                theardAccount.start()
+                threads.append(theardAccount)
                 for idx, page in enumerate(allPages):
                     if stop_event.is_set():
                         break

@@ -28,8 +28,8 @@ class BotTelegram:
         return self
     
     async def send_messages(self, message=''):
-        await self.bot.send_message(chat_id='-4746381732', text=message)
-        logging.info(f"Đã gửi tin nhắn tới chat_id: {4746381732}")
+        await self.bot.send_message(chat_id='-1002493389024', text=message)
+        logging.info(f"Đã gửi tin nhắn tới chat_id: {1002493389024}")
         return
         for chat_id in self.chat_ids:
             try:
