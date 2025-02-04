@@ -42,6 +42,7 @@ def handleCrawlNewFeedVie(account, managerDriver,dirextension = None, stop_event
     manager = managerDriver.get('manager')
     browser = managerDriver.get('browser')
     init = True
+    sendNoti = True
     while not stop_event.is_set() and not global_theard_event.is_set():
         try:
             if not init:
@@ -55,13 +56,17 @@ def handleCrawlNewFeedVie(account, managerDriver,dirextension = None, stop_event
                     manager = Browser(f"/newsfeed/home/{account['id']}", dirextension)
                     browser = manager.start()
 
+                loginInstance = HandleLogin(browser,account,newsfeed_process_instance)
+                browser.get('https://facebook.com')
+                loginInstance.setAccount()
+                loginInstance.login()
+
+
                 if process['status_vie'] == 1:
-                    sleep(30)
+                    sleep(60)
                     process = newsfeed_process_instance.show(account.get('id'))
                     continue
 
-                loginInstance = HandleLogin(browser,account,newsfeed_process_instance)
-                loginInstance.login()
                 sleep(2)
                 closeModal(1,browser)
                 pageLinkPost = f"/posts/"
@@ -77,17 +82,24 @@ def handleCrawlNewFeedVie(account, managerDriver,dirextension = None, stop_event
                         clickOk(browser)
                         profile_button = browser.find_element(By.XPATH, push['openProfile'])
                     except NoSuchElementException as e:
-                        logging.info(f"{account.get('name')}vie chờ 3 phút để thử login lại")
-                        print(f"{account.get('name')}vie chờ 3 phút để thử login lại")
-                        sleep(180)
-                        browser.get('https://facebook.com')
-                        sleep(1)
-                        loginInstance.setAccount()
-                        loginInstance.login()
-                        continue
+                        if sendNoti:
+                            send(f"Tài khoản {account.get('name')} không thể đăng nhập!")
+                            sendNoti = False
+
+                        while not stop_event.is_set() and not global_theard_event.is_set():
+                            checkLogin = loginInstance.loginFacebook(False)
+                            if checkLogin == False:
+                                updateSystemMessage(system_account,'Login thất bại')
+                                print('Đợi 1p rồi thử login lại!')
+                                sleep(60)
+                            else:
+                                send(f"Tài khoản {account.get('name')} ---- cào newsfeed!")
+                                break
+                        sleep(2)
                     except Exception as e:
                         raise e
                         
+                    sendNoti = True
                     actions = ActionChains(browser)
                     
                     listPosts = browser.find_elements(By.XPATH, types['list_posts']) 
@@ -169,31 +181,36 @@ def handleCrawlNewFeed(account, name, dirextension = None,stop_event=None,system
 
         manager = None
         browser = None
-        sendNoti = True
+        # sendNoti = True
         while not stop_event.is_set() and not global_theard_event.is_set():
             try:
                 while not stop_event.is_set() and not global_theard_event.is_set():
-                    try:
-                        manager = Browser(pathProfile,dirextension)
-                        browser = manager.start()
-                        sleep(5)
-                        break
-                    except Exception as e:
-                        sleep(30)
+                    # try:
+                    manager = Browser(pathProfile,dirextension)
+                    browser = manager.start()
+                    sleep(5)
+                    #     break
+                    # except Exception as e:
+                    #     sleep(30)
                 
                 loginInstance = HandleLogin(browser,account,newsfeed_process_instance)
-
-                while not stop_event.is_set() and not global_theard_event.is_set():
-                    checkLogin = loginInstance.loginFacebook(False)
-                    if checkLogin == False:
-                        updateSystemMessage(system_account,'Login thất bại')
-                        print('Đợi 1p rồi thử login lại!')
-                        sleep(60)
-                    else:
-                        account = loginInstance.getAccount()
-                        break
-                sleep(2)
-                loginInstance.updateStatusAcount(account.get('id'),3)
+                try:
+                    browser.get('https://facebook.com')
+                    sleep(1)
+                    loginInstance.login()
+                except Exception as e:
+                    pass
+                # while not stop_event.is_set() and not global_theard_event.is_set():
+                #     checkLogin = loginInstance.loginFacebook(False)
+                #     if checkLogin == False:
+                #         updateSystemMessage(system_account,'Login thất bại')
+                #         print('Đợi 1p rồi thử login lại!')
+                #         sleep(60)
+                #     else:
+                #         account = loginInstance.getAccount()
+                #         break
+                # sleep(2)
+                # loginInstance.updateStatusAcount(account.get('id'),3)
                 
                 try:
                     openProfile(browser,name)
@@ -221,24 +238,42 @@ def handleCrawlNewFeed(account, name, dirextension = None,stop_event=None,system
                         clickOk(browser)
                         profile_button = browser.find_element(By.XPATH, push['openProfile'])
                     except NoSuchElementException as e:
-                        if sendNoti:
-                            send(f"Tài khoản {account.get('name')} không thể đăng nhập!")
-                            sendNoti = False
+                        logging.info(f"{name} chờ 3 phút để thử login lại")
+                        print(f"{name} chờ 3 phút để thử login lại")
+                        sleep(180)
+                        browser.get('https://facebook.com')
+                        sleep(1)
+                        loginInstance.setAccount()
+                        loginInstance.login()
+                        try:
+                            clickOk(browser)
+                            profile_button = browser.find_element(By.XPATH, push['openProfile'])
+                            try:
+                                openProfile(browser,name)
+                                sleep(10)
+                            except Exception as e:
+                                print(f"Không thể chuyển hướng tới fanpage: {name}")
+                        except NoSuchElementException as e:
+                            pass
+                        continue
+                        # if sendNoti:
+                        #     send(f"Tài khoản {account.get('name')} không thể đăng nhập!")
+                        #     sendNoti = False
 
-                        while not stop_event.is_set() and not global_theard_event.is_set():
-                            checkLogin = loginInstance.loginFacebook(False)
-                            if checkLogin == False:
-                                updateSystemMessage(system_account,'Login thất bại')
-                                print('Đợi 1p rồi thử login lại!')
-                                sleep(60)
-                            else:
-                                send(f"Tài khoản {account.get('name')} ---- cào newsfeed: {name}!")
-                                break
-                        sleep(2)
+                        # while not stop_event.is_set() and not global_theard_event.is_set():
+                        #     checkLogin = loginInstance.loginFacebook(False)
+                        #     if checkLogin == False:
+                        #         updateSystemMessage(system_account,'Login thất bại')
+                        #         print('Đợi 1p rồi thử login lại!')
+                        #         sleep(60)
+                        #     else:
+                        #         send(f"Tài khoản {account.get('name')} ---- cào newsfeed: {name}!")
+                        #         break
+                        # sleep(2)
                     except Exception as e:
                         raise e
                         
-                    sendNoti = True
+                    # sendNoti = True
                     actions = ActionChains(browser)
                     
                     listPosts = browser.find_elements(By.XPATH, types['list_posts']) 
@@ -358,6 +393,13 @@ def crawlNewFeed(account,name,dirextension,stop_event=None,system_account=None):
                 # log_newsfeed(account,f"==> Lưu bài viết <==")
 
                 while not stop_event.is_set() and not global_theard_event.is_set():
+                    if browser is None or not browser.service.is_connectable():
+                        print("Trình duyệt đã bị đóng. Khởi chạy lại...")
+                        manager = Browser(pathProfile, dirextension)
+                        browser = manager.start()
+                        browser.get('https://facebook.com')
+                        loginInstance.login()
+
                     try:
                         clickOk(browser)
                         profile_button = browser.find_element(By.XPATH, push['openProfile'])
