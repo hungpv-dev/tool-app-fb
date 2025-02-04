@@ -396,7 +396,7 @@ class HandleLogin:
             logging.error('No has element')
             print('No has element')
 
-    def login(self):
+    def login(self, redirectHome = True):
         account = self.account
         try:
             if 'latest_cookie' not in account:
@@ -418,9 +418,10 @@ class HandleLogin:
                 except Exception as e:
                     raise ValueError(f"Không thể thêm cookie {cookie} vào trình duyệt: {e}")
             
-            sleep(1)
-            self.driver.get('https://facebook.com')
-            sleep(1)
+            if redirectHome:
+                sleep(1)
+                self.driver.get('https://facebook.com')
+                sleep(1)
 
         except Exception as e:
             self.updateMainModel('Không thể login')

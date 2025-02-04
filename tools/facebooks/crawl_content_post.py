@@ -123,7 +123,6 @@ class CrawlContentPost:
         self.modal = modal
 
         content, content_link = extract_facebook_content(modal)
-        content = f'Test: {content}'
         data['content'] = content
         data['content_link'] = content_link
 

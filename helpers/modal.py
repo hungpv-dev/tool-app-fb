@@ -76,8 +76,13 @@ def openProfile(browser,name_fanpage = ''):
 
 import re
 def remove_notifications(text):
-    index = text.lower().find("notifications")
-    
+    names = ['notifications','unseen']
+    for name in names:
+        index = text.lower().find(name)
+        text = removeNumberBeforeName(text,index)
+    return text
+
+def removeNumberBeforeName(text,index):
     if index != -1:
         text = text[:index].strip() 
         text_parts = text.split()

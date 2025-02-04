@@ -85,6 +85,15 @@ def handleCrawlNewFeedVie(account, managerDriver,dirextension = None, stop_event
                         clickOk(browser)
                         profile_button = browser.find_element(By.XPATH, push['openProfile'])
                     except NoSuchElementException as e:
+                        logging.info(f"{account.get('name')}vie chờ 3 phút để thử login lại")
+                        print(f"{account.get('name')}vie chờ 3 phút để thử login lại")
+                        sleep(180)
+                        browser.get('https://facebook.com')
+                        sleep(1)
+                        loginInstance.setAccount()
+                        loginInstance.login()
+                        continue
+                    except Exception as e:
                         raise e
                         
                     actions = ActionChains(browser)
@@ -313,44 +322,61 @@ def crawlNewFeed(account,name,dirextension,stop_event=None,system_account=None):
         browser = None
         while not stop_event.is_set() and not global_theard_event.is_set():
             try:
-                while not stop_event.is_set() and not global_theard_event.is_set():
-                    try:
-                        manager = Browser(pathProfile,dirextension)
-                        browser = manager.start()
-                        sleep(5)
-                        break
-                    except Exception as e:
-                        # log_newsfeed(account,f"Khi cào lưu db k dùng đc, chờ 30s để thử lại")
-                        sleep(30)
+                manager = Browser(pathProfile,dirextension)
+                browser = manager.start()
+                sleep(5)
                 
                 loginInstance = HandleLogin(browser,account,newsfeed_process_instance)
+                try:
+                    browser.get('https://facebook.com')
+                    sleep(1)
+                    loginInstance.login()
+                except Exception as e:
+                    pass
+                # while not stop_event.is_set() and not global_theard_event.is_set():
+                #     checkLogin = loginInstance.loginFacebook(False)
+                #     if checkLogin == False:
+                #         updateSystemMessage(system_account,'Login thất bại')
+                #         print('Đợi 1p rồi thử login lại!')
+                #         sleep(60)
+                #     else:
+                #         account = loginInstance.getAccount()
+                #         break
 
-                while not stop_event.is_set() and not global_theard_event.is_set():
-                    checkLogin = loginInstance.loginFacebook(False)
-                    if checkLogin == False:
-                        updateSystemMessage(system_account,'Login thất bại')
-                        print('Đợi 1p rồi thử login lại!')
-                        sleep(60)
-                    else:
-                        account = loginInstance.getAccount()
-                        break
-
-                loginInstance.updateStatusAcount(account.get('id'),3)
-                sleep(2)
+                # loginInstance.updateStatusAcount(account.get('id'),3)
+                # sleep(2)
                 try:
                     openProfile(browser,name)
                     sleep(10)
                 except Exception as e:
                     print(f"Không thể chuyển hướng tới fanpage: {name}")
 
-                browser.get('https://facebook.com')
-                sleep(2)
                 crawl_instance = CrawlContentPost(browser)
                 # log_newsfeed(account,f"==> Lưu bài viết <==")
+
                 while not stop_event.is_set() and not global_theard_event.is_set():
                     try:
                         clickOk(browser)
                         profile_button = browser.find_element(By.XPATH, push['openProfile'])
+                    except NoSuchElementException as e:
+                        logging.info(f"{name} chờ 3 phút để thử login lại")
+                        print(f"{name} chờ 3 phút để thử login lại")
+                        sleep(180)
+                        browser.get('https://facebook.com')
+                        sleep(1)
+                        loginInstance.setAccount()
+                        loginInstance.login()
+                        try:
+                            clickOk(browser)
+                            profile_button = browser.find_element(By.XPATH, push['openProfile'])
+                            try:
+                                openProfile(browser,name)
+                                sleep(10)
+                            except Exception as e:
+                                print(f"Không thể chuyển hướng tới fanpage: {name}")
+                        except NoSuchElementException as e:
+                            pass
+                        continue
                     except Exception as e:
                         raise e
 
