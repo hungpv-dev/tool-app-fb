@@ -519,12 +519,13 @@ def extract_facebook_content(modal):
             if href:
                 clean_href = clean_facebook_url_redirect(href)
                 clean_href = remove_params(clean_href, 'fbclid')
-                content_link.append(clean_href)
                 text_link = a.text.strip()
-                replace_content.append({
-                    'text': text_link,
-                    'link': clean_href,
-                })
+                if not text_link.startswith('#'):
+                    content_link.append(clean_href)
+                    replace_content.append({
+                        'text': text_link,
+                        'link': clean_href,
+                    })
 
         contentText = content.text
         for rep in replace_content:

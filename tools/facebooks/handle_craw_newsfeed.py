@@ -61,15 +61,7 @@ def handleCrawlNewFeedVie(account, managerDriver,dirextension = None, stop_event
                     continue
 
                 loginInstance = HandleLogin(browser,account,newsfeed_process_instance)
-                while not stop_event.is_set() and not global_theard_event.is_set():
-                    checkLogin = loginInstance.loginFacebook(False)
-                    if checkLogin == False:
-                        print('Đợi 1p rồi thử login lại!')
-                        updateSystemMessage(system_account,'Login thất bại')
-                        sleep(60)
-                    else:
-                        account = loginInstance.getAccount()
-                        break
+                loginInstance.login()
                 sleep(2)
                 closeModal(1,browser)
                 pageLinkPost = f"/posts/"
@@ -187,7 +179,6 @@ def handleCrawlNewFeed(account, name, dirextension = None,stop_event=None,system
                         sleep(5)
                         break
                     except Exception as e:
-                        # log_newsfeed(account,f"{name} k dùng được proxy, chờ 30s để thử lại")
                         sleep(30)
                 
                 loginInstance = HandleLogin(browser,account,newsfeed_process_instance)
@@ -218,13 +209,13 @@ def handleCrawlNewFeed(account, name, dirextension = None,stop_event=None,system
                 browser.execute_script("document.body.style.zoom='0.2';")
                 sleep(3)
                 listId = set() 
-                # log_newsfeed(account,f"====================Thực thi cào fanpage {name}=====================")
                 while not stop_event.is_set() and not global_theard_event.is_set(): 
-
                     if browser is None or not browser.service.is_connectable():
                         print("Trình duyệt đã bị đóng. Khởi chạy lại...")
                         manager = Browser(pathProfile, dirextension)
                         browser = manager.start()
+                        browser.get('https://facebook.com')
+                        loginInstance.login()
 
                     try:
                         clickOk(browser)
@@ -233,6 +224,17 @@ def handleCrawlNewFeed(account, name, dirextension = None,stop_event=None,system
                         if sendNoti:
                             send(f"Tài khoản {account.get('name')} không thể đăng nhập!")
                             sendNoti = False
+
+                        while not stop_event.is_set() and not global_theard_event.is_set():
+                            checkLogin = loginInstance.loginFacebook(False)
+                            if checkLogin == False:
+                                updateSystemMessage(system_account,'Login thất bại')
+                                print('Đợi 1p rồi thử login lại!')
+                                sleep(60)
+                            else:
+                                break
+                        sleep(2)
+                    except Exception as e:
                         raise e
                         
                     sendNoti = True
