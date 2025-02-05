@@ -9,6 +9,7 @@ from main.newsfeed import get_newsfeed_process_instance
 import logging
 from sql.system import System
 from bot import send
+import uuid
 
 account_instance = Account()
 error_instance = Error()
@@ -45,7 +46,7 @@ def process_newsfeed(account, stop_event):
 
         try:
             if checkProxy == True:
-                manager = Browser(f"/newsfeed/home/{account['id']}",extension)
+                manager = Browser(f"/newsfeed/{account['id']}/{uuid.uuid4()}",extension)
                 browser = manager.start()
                 newsfeed_process_instance.update_process(account.get('id'),'Đã khởi tạo trình duyệt')
             else:

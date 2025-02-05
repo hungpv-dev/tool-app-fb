@@ -113,7 +113,7 @@ class HandleLogin:
                             # print('Get email')
                             # self.driver.find_element(By.NAME,'email')
                             # logging.info(f'{self.account.get("name")} lấy mã từ Outlook')
-                            # print(f'{self.account.get("name")} lấy mã từ Outlook')``
+                            # print(f'{self.account.get("name")} lấy mã từ Outlook')
                             # try:
                             #     self.updateMainModel('Login với Outlook')
                             #     print('Chuyển hướng qua email')
