@@ -81,6 +81,16 @@ def push_page(page,account,dirextension,stop_event,system_account = None):
             updateSystemMessage(system_account,f'Bắt đầu đăng page: {name}')
             retry_count = {}
             while not stop_event.is_set() and not global_theard_event.is_set():
+                if browser is None or not browser.service.is_connectable():
+                    print("Trình duyệt đã bị đóng. Khởi chạy lại...")
+                    manager = Browser(pathProfile, dirextension)
+                    browser = manager.start()
+                    browser.get('https://facebook.com')
+                    try:
+                        loginInstance.login()
+                    except Exception as e:
+                        print('Looxi: {e}')
+
                 cookie = account.get('latest_cookie')
                 pageUP = page_post_instance.get_page_up({'page_id': page["id"],'account_id':account['id']})
 
@@ -190,11 +200,15 @@ def push_list(account,dirextension,stop_event,system_account = None):
             sleep(2)
             push = Push(browser,account,dirextension,manager)
             while not stop_event.is_set() and not global_theard_event.is_set():
-
                 if browser is None or not browser.service.is_connectable():
                     print("Trình duyệt đã bị đóng. Khởi chạy lại...")
                     manager = Browser(pathProfile, dirextension)
                     browser = manager.start()
+                    browser.get('https://facebook.com')
+                    try:
+                        loginInstance.login()
+                    except Exception as e:
+                        print('Looxi: {e}')
                 
                 posts = browseTime(account)
                 logging.error(f"{account.get('name')} => đăng: {len(posts)} bài viết")

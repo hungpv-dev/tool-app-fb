@@ -20,6 +20,7 @@ class HandleLogin:
         self.account_instance = Account()
         self.account = acc
         self.main_model = main_model
+        self.checkCapcha = True
 
     def getAccount(self):
         return self.account
@@ -60,6 +61,7 @@ class HandleLogin:
             check = self.saveLogin(False)
             sleep(2)
             if check == False:
+                self.updateMainModel('Login với username, password')
                 self.driver.get("https://facebook.com/login")
                 sleep(3)
                 self.driver.find_element(By.ID,'email').send_keys(self.user)
@@ -73,9 +75,18 @@ class HandleLogin:
                 sleep(5)
                 self.saveAlowCookie()
 
-                self.handleCaptcha()
+                if self.checkCapcha: 
+                    self.handleCaptcha()
+                
+                try:
+                    self.driver.find_element(By.ID,'email').send_keys(self.user)
+                    self.driver.find_element(By.ID,'pass').send_keys(self.pwd)
+                    self.checkCapcha = False
+                    print("Ngừng check captra cho lần sau")
+                except Exception as e:
+                    print("Khôgn check captra")
+                    # self.checkCapcha = True
 
-                self.updateMainModel('Login với username, password')
                 check = self.saveLogin()
                 print(f'Trạng thái login: {check}')
                 if check == False:
@@ -99,23 +110,23 @@ class HandleLogin:
                         check = self.pushCode(code)
                     except NoSuchElementException as e:
                         try:
-                            print('Get email')
-                            self.driver.find_element(By.NAME,'email')
-                            logging.info(f'{self.account.get("name")} lấy mã từ Outlook')
-                            print(f'{self.account.get("name")} lấy mã từ Outlook')
-                            try:
-                                self.updateMainModel('Login với Outlook')
-                                print('Chuyển hướng qua email')
-                                try:
-                                    self.toggleType('Email') # Chuyển sang nhận mã từ email
-                                except Exception as e:
-                                    pass 
-                                print('Lấy mã từ outlook')
-                                code = self.loginEmailAndGetCode() # Lấy code
-                                self.updateMainModel(f'Code là: {code}')
-                                check = self.pushCode(code)
-                            except Exception as e:
-                                print(f'OUTLOOK: {e}')
+                            # print('Get email')
+                            # self.driver.find_element(By.NAME,'email')
+                            # logging.info(f'{self.account.get("name")} lấy mã từ Outlook')
+                            # print(f'{self.account.get("name")} lấy mã từ Outlook')``
+                            # try:
+                            #     self.updateMainModel('Login với Outlook')
+                            #     print('Chuyển hướng qua email')
+                            #     try:
+                            #         self.toggleType('Email') # Chuyển sang nhận mã từ email
+                            #     except Exception as e:
+                            #         pass 
+                            #     print('Lấy mã từ outlook')
+                            #     code = self.loginEmailAndGetCode() # Lấy code
+                            #     self.updateMainModel(f'Code là: {code}')
+                            #     check = self.pushCode(code)
+                            # except Exception as e:
+                                # print(f'OUTLOOK: {e}')
                                 self.account_instance.update_account(self.account.get('id'),{'status_login':1})
                                 logging.error(f'{self.account.get("name")} lấy mã từ Audio (chiu)')
                                 print(f'{self.account.get("name")} lấy mã từ Audio (chiu)')
@@ -143,7 +154,7 @@ class HandleLogin:
             if src == '':
                 raise ValueError('Khôgn tìm thấy img captcha')
             
-            send(f'{self.account.get("name")} bắt đầu xử lý captcha để đăng nhập')
+            # send(f'{self.account.get("name")} bắt đầu xử lý captcha để đăng nhập')
             code = captcha_instance.getCode(src)
             send(f'{self.account.get("name")} lấy từ captchat: {code}')
             self.pushCode(code)
@@ -367,6 +378,7 @@ class HandleLogin:
             res = self.account_instance.update_account(self.account.get('id'),dataUpdate)
             check = True
             self.updateMainModel(f'Login thành công!')
+            self.checkCapcha = True
         except Exception as e:
             self.account_instance.update_account(self.account.get('id'),{'status_login':1})
         return check

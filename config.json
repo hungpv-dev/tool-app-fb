@@ -1,5 +1,5 @@
 {
     "headless": true,
-    "driver_path": "/home/hungpv/.wdm/drivers/chromedriver/linux64/132.0.6834.159/chromedriver-linux64/chromedriver",
+    "driver_path": "C:\\Users\\Admin\\.wdm\\drivers\\chromedriver\\win64\\132.0.6834.159\\chromedriver-win32/chromedriver.exe",
     "omocaptcha_token": "OMO_K7RYJNUYJXVFGQXDED8VOXZLMHKIALPPM7NOME3PLBK8QCR5NT6Y2MRJ1E8FAJ1737510099"
 }

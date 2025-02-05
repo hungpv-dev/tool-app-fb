@@ -83,8 +83,8 @@ def process_fanpage(account, name, dirextension, stop_event, managerDriver,syste
     print(f"Đang xử lý fanpage: {name}")
     threads = [
         Thread(target=handleCrawlNewFeed, args=(account, name, dirextension, stop_event,system_account)),
-        # Thread(target=crawlNewFeed, args=(account, name, dirextension, stop_event,system_account)),
-        # Thread(target=crawlNewFeed, args=(account, name, dirextension, stop_event,system_account)),
+        Thread(target=crawlNewFeed, args=(account, name, dirextension, stop_event,system_account)),
+        Thread(target=crawlNewFeed, args=(account, name, dirextension, stop_event,system_account)),
     ]
 
     # Khởi chạy các thread
