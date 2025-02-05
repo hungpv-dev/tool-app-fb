@@ -71,6 +71,7 @@ def handleCrawlNewFeedVie(account, managerDriver ,dirextension = None, stop_even
                 try:
                     clickOk(browser)
                     profile_button = browser.find_element(By.XPATH, push['openProfile'])
+                    loginInstance.updateStatusAcount(account.get('id'),3)
                 except NoSuchElementException as e:
                     print(f'{account.get("name")} login thất bại, đợi 1p...')
                     logging.error(f'{account.get("name")} login thất bại, đợi 1p...')
@@ -106,6 +107,7 @@ def handleCrawlNewFeedVie(account, managerDriver ,dirextension = None, stop_even
                     try:
                         clickOk(browser)
                         profile_button = browser.find_element(By.XPATH, push['openProfile'])
+                        loginInstance.updateStatusAcount(account.get('id'),3)
                     except NoSuchElementException as e:
                         if sendNoti:
                             send(f"Tài khoản {account.get('name')} không thể đăng nhập!")
@@ -264,6 +266,7 @@ def handleCrawlNewFeed(account, name, dirextension = None,stop_event=None,system
                     try:
                         clickOk(browser)
                         profile_button = browser.find_element(By.XPATH, push['openProfile'])
+                        # loginInstance.updateStatusAcount(account.get('id'),3)
                     except NoSuchElementException as e:
                         logging.info(f"{name} chờ 3 phút để thử login lại")
                         print(f"{name} chờ 3 phút để thử login lại")
