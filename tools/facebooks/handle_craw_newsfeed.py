@@ -34,7 +34,7 @@ def updateSystemMessage(system,message):
     if system:
         system_instance.push_message(system.get('id'),message)
 
-def handleCrawlNewFeedVie(account, managerDriver,dirextension = None, stop_event=None,system_account=None):
+def handleCrawlNewFeedVie(account, managerDriver ,dirextension = None, stop_event=None,system_account=None):
     process = newsfeed_process_instance.show(account.get('id'))
     newfeed_instance = NewFeedModel()
     error_instance = Error()
@@ -43,11 +43,19 @@ def handleCrawlNewFeedVie(account, managerDriver,dirextension = None, stop_event
     browser = managerDriver.get('browser')
     init = True
     sendNoti = True
+    pageLinkPost = f"/posts/"
+    pageLinkStory = "https://www.facebook.com/permalink.php"
+    loginInstance = HandleLogin(browser,account,newsfeed_process_instance)
     while not stop_event.is_set() and not global_theard_event.is_set():
         try:
             if not init:
                 manager = Browser(f"/newsfeed/home/{account['id']}",dirextension)
                 browser = manager.start()
+                loginInstance.setAccount()
+                try:
+                    loginInstance.login()
+                except Exception as e:
+                    print('Looxi: {e}')
             else:
                 init = False
                 
@@ -55,22 +63,39 @@ def handleCrawlNewFeedVie(account, managerDriver,dirextension = None, stop_event
                 if browser is None or not browser.service.is_connectable():
                     manager = Browser(f"/newsfeed/home/{account['id']}", dirextension)
                     browser = manager.start()
+                    try:
+                        loginInstance.login()
+                    except Exception as e:
+                        print('Looxi: {e}')
 
-                loginInstance = HandleLogin(browser,account,newsfeed_process_instance)
+                try:
+                    clickOk(browser)
+                    profile_button = browser.find_element(By.XPATH, push['openProfile'])
+                except NoSuchElementException as e:
+                    print(f'{account.get("name")} login thất bại, đợi 1p...')
+                    logging.error(f'{account.get("name")} login thất bại, đợi 1p...')
+                    if sendNoti:
+                        send(f"Tài khoản {account.get('name')} không thể đăng nhập!")
+                        sendNoti = False
+                    sleep(60)
+                    try:
+                        loginInstance.setAccount()
+                        loginInstance.login()
+                    except Exception as e:
+                        print('Looxi: {e}')
+                    continue
+
+                sendNoti = True
                 browser.get('https://facebook.com')
-                loginInstance.setAccount()
-                loginInstance.login()
-
-
                 if process['status_vie'] == 1:
                     sleep(60)
                     process = newsfeed_process_instance.show(account.get('id'))
                     continue
 
-                sleep(2)
+                clickOk(browser)
+                sleep(1)
                 closeModal(1,browser)
-                pageLinkPost = f"/posts/"
-                pageLinkStory = "https://www.facebook.com/permalink.php"
+                sleep(1)
                 
                 browser.execute_script("document.body.style.zoom='0.2';")
                 sleep(3)
@@ -93,7 +118,7 @@ def handleCrawlNewFeedVie(account, managerDriver,dirextension = None, stop_event
                                 print('Đợi 1p rồi thử login lại!')
                                 sleep(60)
                             else:
-                                send(f"Tài khoản {account.get('name')} ---- cào newsfeed!")
+                                send(f"Tài khoản {account.get('name')} bắt đầu cào newsfeed!")
                                 break
                         sleep(2)
                     except Exception as e:
@@ -184,11 +209,11 @@ def handleCrawlNewFeed(account, name, dirextension = None,stop_event=None,system
         # sendNoti = True
         while not stop_event.is_set() and not global_theard_event.is_set():
             try:
-                while not stop_event.is_set() and not global_theard_event.is_set():
+                # while not stop_event.is_set() and not global_theard_event.is_set():
                     # try:
-                    manager = Browser(pathProfile,dirextension)
-                    browser = manager.start()
-                    sleep(5)
+                manager = Browser(pathProfile,dirextension)
+                browser = manager.start()
+                sleep(5)
                     #     break
                     # except Exception as e:
                     #     sleep(30)
@@ -232,8 +257,10 @@ def handleCrawlNewFeed(account, name, dirextension = None,stop_event=None,system
                         manager = Browser(pathProfile, dirextension)
                         browser = manager.start()
                         browser.get('https://facebook.com')
-                        loginInstance.login()
-
+                        try:
+                            loginInstance.login()
+                        except Exception as e:
+                            print('Looxi: {e}')
                     try:
                         clickOk(browser)
                         profile_button = browser.find_element(By.XPATH, push['openProfile'])
@@ -244,7 +271,10 @@ def handleCrawlNewFeed(account, name, dirextension = None,stop_event=None,system
                         browser.get('https://facebook.com')
                         sleep(1)
                         loginInstance.setAccount()
-                        loginInstance.login()
+                        try:
+                            loginInstance.login()
+                        except Exception as e:
+                            print('Looxi: {e}')
                         try:
                             clickOk(browser)
                             profile_button = browser.find_element(By.XPATH, push['openProfile'])
@@ -332,7 +362,6 @@ def handleCrawlNewFeed(account, name, dirextension = None,stop_event=None,system
             except Exception as e:
                 print(f"{name} link: {e}")
                 logging.error(f"{name} link: {e}")
-                # log_newsfeed(account,'Lỗi khi xử lý lướt website, thử lại sau 30s')
                 sleep(30)
             finally:
                 if browser:  # Kiểm tra lại trước khi gọi quit()
@@ -398,8 +427,10 @@ def crawlNewFeed(account,name,dirextension,stop_event=None,system_account=None):
                         manager = Browser(pathProfile, dirextension)
                         browser = manager.start()
                         browser.get('https://facebook.com')
-                        loginInstance.login()
-
+                        try:
+                            loginInstance.login()
+                        except Exception as e:
+                            print('Looxi: {e}')
                     try:
                         clickOk(browser)
                         profile_button = browser.find_element(By.XPATH, push['openProfile'])
@@ -410,7 +441,10 @@ def crawlNewFeed(account,name,dirextension,stop_event=None,system_account=None):
                         browser.get('https://facebook.com')
                         sleep(1)
                         loginInstance.setAccount()
-                        loginInstance.login()
+                        try:
+                            loginInstance.login()
+                        except Exception as e:
+                            print('Looxi: {e}')
                         try:
                             clickOk(browser)
                             profile_button = browser.find_element(By.XPATH, push['openProfile'])

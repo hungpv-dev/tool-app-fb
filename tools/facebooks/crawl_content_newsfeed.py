@@ -65,6 +65,7 @@ class CrawContentNewsfeed:
                     send(f"Tài khoản {self.account.get('name')} không thể đăng nhập!")
                     sendNoti = False
             except Exception as e:
+                print(f'Lỗi: {e}')
                 raise e
             finally:
                 logging.error("Thử lại sau 1 phút...")
@@ -82,8 +83,8 @@ def process_fanpage(account, name, dirextension, stop_event, managerDriver,syste
     print(f"Đang xử lý fanpage: {name}")
     threads = [
         Thread(target=handleCrawlNewFeed, args=(account, name, dirextension, stop_event,system_account)),
-        Thread(target=crawlNewFeed, args=(account, name, dirextension, stop_event,system_account)),
-        Thread(target=crawlNewFeed, args=(account, name, dirextension, stop_event,system_account)),
+        # Thread(target=crawlNewFeed, args=(account, name, dirextension, stop_event,system_account)),
+        # Thread(target=crawlNewFeed, args=(account, name, dirextension, stop_event,system_account)),
     ]
 
     # Khởi chạy các thread
@@ -136,10 +137,7 @@ class PageChecker:
 
             if allPages: 
                 names = []
-                newsfeed_process_instance.update_process(account.get('id'), f'Xử lý: {len(allPages)} page')
-                theardAccount = Thread(target=handleCrawlNewFeedVie, args=(account, managerDriver, self.dirextension, stop_event,self.system_account))
-                theardAccount.start()
-                threads.append(theardAccount)
+
                 for idx, page in enumerate(allPages):
                     if stop_event.is_set():
                         break
@@ -148,10 +146,16 @@ class PageChecker:
                     print(f'=================={name}================')
                     names.append(name)
                     # Khởi tạo các process
-                    thread = Thread(target=process_fanpage, args=(account, name,self.dirextension, stop_event, managerDriver,self.system_account))
+                    thread = Thread(target=process_fanpage, args=(account, name,self.dirextension, stop_event, managerDriver, self.system_account))
                     threads.append(thread)
                     thread.start()
                     sleep(2)
+
+                newsfeed_process_instance.update_process(account.get('id'), f'Xử lý: {len(allPages)} page')
+                theardAccount = Thread(target=handleCrawlNewFeedVie, args=(account, managerDriver, self.dirextension, stop_event,self.system_account))
+                theardAccount.start()
+                threads.append(theardAccount)
+
                 send(f'{account.get("name")} cào newsfeed: {", ".join(names)}')
                 for thread in threads:
                     thread.join()
