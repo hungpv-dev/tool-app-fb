@@ -60,6 +60,7 @@ class HandleLogin:
             self.saveAlowCookie()
             check = self.saveLogin(False)
             sleep(2)
+            print(f'Login success: {check}')
             if check == False:
                 self.updateMainModel('Login với username, password')
                 self.driver.get("https://facebook.com/login")
@@ -353,6 +354,7 @@ class HandleLogin:
     def saveLogin(self,saveCookie = True):
         check = False
         try:
+            print('Check block')
             checkBlock = self.checkBlock()
             # print(f"Check block: {checkBlock}")
             if checkBlock:
@@ -365,6 +367,7 @@ class HandleLogin:
             sleep(2)
             clickOk(self.driver)
 
+            print('Get thẻ open profile')
             self.driver.find_element(By.XPATH, push['openProfile'])
             cookies = self.driver.get_cookies()
             dataUpdate = {
@@ -380,6 +383,7 @@ class HandleLogin:
             self.updateMainModel(f'Login thành công!')
             self.checkCapcha = True
         except Exception as e:
+            print(f'Lỗi save: {e}')
             self.account_instance.update_account(self.account.get('id'),{'status_login':1})
         return check
     

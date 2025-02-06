@@ -54,25 +54,28 @@ class Push:
                 post_process_instance.update_process(self.account.get('id'),'Bắt đầu đăng nhập')
                 logging.error(f'==================Push ({self.account["name"]})================')
                 print(f'==================Push ({self.account["name"]})================')
-                checkLogin = loginInstance.loginFacebook()
+                checkLogin = loginInstance.loginFacebook(sendNoti)
                 if checkLogin == False:
                     raise ValueError('Không thể login')
                 sendNoti = True
                 account = loginInstance.getAccount()
                 post_process_instance.update_process(self.account.get('id'),'Đăng nhập thành công')
                 self.account = account
+                loginInstance.updateStatusAcount(self.account['id'],4) # Đang lấy
                 self.handleData(stop_event);          
             except ValueError as e:
                 post_process_instance.update_process(self.account.get('id'),'Login thất bài, thử lại sau 1p...')
                 logging.error(f"Lỗi khi xử lý đăng bài viết!: {e}")
                 if self.system_account:
                     system_instance.push_message(self.system_account.get('id'),'Đăng nhập thất bại!')
+                logging.error(f"Lỗi khi xử lý đăng bài viết!: {e}")
                 print(f"Lỗi khi xử lý đăng bài viết!: {e}")
                 self.error_instance.insertContent(e)
                 if sendNoti:
                     send(f"Tài khoản {self.account.get('name')} không thể đăng nhập!")
                     sendNoti = False
             except Exception as e:
+                print(f'Lỗi: {e}')
                 raise e
             finally:
                 logging.error("Thử lại sau 1 phút...")
@@ -95,7 +98,6 @@ class Push:
                         pageIds.add(pot.get('id'))
                         names.append(pot.get('name'))
                         worker_thread = threading.Thread(target=push_page, args=(pot,self.account,self.dirextension,stop_event,self.system_account))
-                        worker_thread.daemon = True  # Dừng thread khi chương trình chính dừng
                         worker_thread.start()
                         threads.append(worker_thread)
                         post_process_instance.update_task(self.account.get('id'),worker_thread)
@@ -107,9 +109,12 @@ class Push:
             
             send(f'{self.account.get("name")} đăng bài trên: {", ".join(names)}')
                 
+            managerDriver = {
+                'browser': self.browser,
+                'manager': self.manager,
+            }
             try:
-                worker_thread = threading.Thread(target=push_list, args=(self.account,self.dirextension,stop_event,self.system_account))
-                worker_thread.daemon = True
+                worker_thread = threading.Thread(target=push_list, args=(self.account, managerDriver,self.dirextension,stop_event,self.system_account))
                 worker_thread.start()
                 threads.append(worker_thread)
                 post_process_instance.update_task(self.account.get('id'),worker_thread)

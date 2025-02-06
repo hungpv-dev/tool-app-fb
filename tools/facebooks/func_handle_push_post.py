@@ -164,52 +164,79 @@ def browseTime(account):
     listPosts = pagePosts_instance.get_post_time({'account_id': account['id']})
     return listPosts
 
-def push_list(account,dirextension,stop_event,system_account = None):
+def push_list(account, managerDriver, dirextension,stop_event,system_account = None):
     page_post_instance = PagePosts()
     error_instance = Error()
     from tools.facebooks.browser_post import Push
     pathProfile = f"/push/{account['id']}/{str(uuid.uuid4())}"
-    manager = None
-    browser = None
-    loginInstance = None
+    init = True
+    manager = managerDriver.get('manager')
+    browser = managerDriver.get('browser')
+    sendNoti = True
     while not stop_event.is_set() and not global_theard_event.is_set():
         retry_count = {}
-        try:
-            manager = Browser(pathProfile,dirextension,'chrome',loadContent=True)
+        if not init:
+            if browser:
+                browser.quit()
+            if manager:
+                manager.cleanup()
+            manager = Browser(pathProfile,dirextension,loadContent=True)
             browser = manager.start()
             loginInstance = HandleLogin(browser,account)
+            loginInstance.setAccount()
+            try:
+                loginInstance.login()
+            except Exception as e:
+                print('Looxi: {e}')
+        else:
+            init = False
+
+        try:
             sleep(3)
-            while not stop_event.is_set() and not global_theard_event.is_set():
-                try:
-                    checkLogin = loginInstance.loginFacebook(False)
-                    if checkLogin == False:
-                        post_process_instance.update_process(account.get('id'),'Không login được, đợi 1p')
-                        updateSystemMessage(system_account,'Login thất bại')
-                    else:
-                        account = loginInstance.getAccount()
-                        loginInstance.updateStatusAcount(account.get('id'),4)
-                        break
-                except Exception as e:
-                    logging.error(e)
-                    print(e)
-                    error_instance.insertContent(e)
-                finally:
-                    logging.error('Đợi 1p rồi thử login lại!')
-                    print('Đợi 1p rồi thử login lại!')
-                    sleep(60)
-            sleep(2)
             push = Push(browser,account,dirextension,manager)
+            loginInstance = HandleLogin(browser,account) 
             while not stop_event.is_set() and not global_theard_event.is_set():
                 if browser is None or not browser.service.is_connectable():
+                    if browser:
+                        browser.quit()
+                    if manager:
+                        manager.cleanup()
+
                     print("Trình duyệt đã bị đóng. Khởi chạy lại...")
-                    manager = Browser(pathProfile, dirextension)
+                    manager = Browser(pathProfile, dirextension, loadContent=True)
                     browser = manager.start()
                     browser.get('https://facebook.com')
+                    loginInstance.setAccount()
                     try:
                         loginInstance.login()
                     except Exception as e:
                         print('Looxi: {e}')
+                    
+                try:
+                    clickOk(browser)
+                    profile_button = browser.find_element(By.XPATH, pushType['openProfile'])
+                    loginInstance.updateStatusAcount(account.get('id'),4)
+                except NoSuchElementException as e:
+                    print(f'{account.get("name")} login thất bại, đợi 1p...')
+                    logging.error(f'{account.get("name")} login thất bại, đợi 1p...')
+                    loginInstance = HandleLogin(browser,account) 
+                    while not stop_event.is_set() and not global_theard_event.is_set():
+                        checkLogin = loginInstance.loginFacebook(sendNoti)
+                        if checkLogin == False:
+                            updateSystemMessage(system_account,'Login thất bại')
+                            print('Đợi 1p rồi thử login lại!')
+                            sleep(60)
+                        else:
+                            send(f"Tài khoản {account.get('name')} bắt đầu cào newsfeed!")
+                            break
+                    if sendNoti:
+                        send(f"Tài khoản {account.get('name')} không thể đăng nhập!")
+                        sendNoti = False
+                    sleep(2)
                 
+                sendNoti = True
+                
+                # browser.get('https://facebook.com')
                 posts = browseTime(account)
                 logging.error(f"{account.get('name')} => đăng: {len(posts)} bài viết")
                 print(f"{account.get('name')} => đăng: {len(posts)} bài viết")
@@ -229,7 +256,7 @@ def push_list(account,dirextension,stop_event,system_account = None):
                                 profile_button = browser.find_element(By.XPATH, pushType['openProfile'])
                                 push.push(page,post,name)
                                 page_post_instance.update_status(post['id'],{
-                                    'status':2,
+                                    'status': 2,
                                     'cookie_id': account['latest_cookie']['id']
                                 })
                                 post_process_instance.update_process(account.get('id'),f"Đăng thành công bài: {post['id']}")
@@ -238,19 +265,18 @@ def push_list(account,dirextension,stop_event,system_account = None):
                                 break
                             except NoSuchElementException as e:
                                 page_post_instance.update_status(post['id'], {'status': 1})
-                                send(f"Tài khoản {account.get('name')} không thể đăng nhập!")
-                                raise e
+                                break
                             except Exception as e:
                                 retry_count[post_id] += 1
-                                error_instance.insertContent(e)
                                 logging.error(e)
                                 print(e)
                                 error_instance.insertContent(e)
                                 if retry_count[post_id] >= 3:
                                     page_post_instance.update_status(post['id'],{
-                                        'status':4,
+                                        'status': 4,
                                         'cookie_id': account['latest_cookie']['id']
                                     })
+                                    send(f'{account.get("name")} không đăng được bài viết')
                                     logging.error(f"Bài viết {post_id} đăng lỗi quá 3 lần. Bỏ qua.")
                                     break
                                 logging.error(f"Lỗi đăng bài {post_id}. Thử lại sau 30s (lần thứ {retry_count[post_id]}).")
@@ -258,8 +284,6 @@ def push_list(account,dirextension,stop_event,system_account = None):
                 else:
                     logging.error('Không có bài nào cần đăng trong thời gian này, đợi 30s...')
                     print('Không có bài nào cần đăng trong thời gian này, đợi 30s...')
-                    if loginInstance:
-                        loginInstance.updateStatusAcount(account.get('id'),2)
                     sleep(30)
         except Exception as e:
             error_instance.insertContent(e)

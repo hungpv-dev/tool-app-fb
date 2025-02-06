@@ -109,12 +109,8 @@ def handleCrawlNewFeedVie(account, managerDriver ,dirextension = None, stop_even
                         profile_button = browser.find_element(By.XPATH, push['openProfile'])
                         loginInstance.updateStatusAcount(account.get('id'),3)
                     except NoSuchElementException as e:
-                        if sendNoti:
-                            send(f"Tài khoản {account.get('name')} không thể đăng nhập!")
-                            sendNoti = False
-
                         while not stop_event.is_set() and not global_theard_event.is_set():
-                            checkLogin = loginInstance.loginFacebook(False)
+                            checkLogin = loginInstance.loginFacebook(sendNoti)
                             if checkLogin == False:
                                 updateSystemMessage(system_account,'Login thất bại')
                                 print('Đợi 1p rồi thử login lại!')
@@ -122,6 +118,9 @@ def handleCrawlNewFeedVie(account, managerDriver ,dirextension = None, stop_even
                             else:
                                 send(f"Tài khoản {account.get('name')} bắt đầu cào newsfeed!")
                                 break
+                        if sendNoti:
+                            send(f"Tài khoản {account.get('name')} không thể đăng nhập!")
+                            sendNoti = False
                         sleep(2)
                     except Exception as e:
                         raise e
