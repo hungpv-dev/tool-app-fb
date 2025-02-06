@@ -5,7 +5,7 @@ from helpers.log import config_log
 from helpers.system import init_system,close_system
 
 if __name__ == "__main__":
-    init_system()
+    # init_system()
 
     config_log()
 
@@ -20,5 +20,5 @@ if __name__ == "__main__":
     # Khởi động ứng dụng
     root.mainloop()
 
-    close_system()
+    # close_system()
 
