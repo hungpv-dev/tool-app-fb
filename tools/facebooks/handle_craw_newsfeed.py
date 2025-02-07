@@ -51,6 +51,7 @@ def handleCrawlNewFeedVie(account, managerDriver ,dirextension = None, stop_even
             if not init:
                 manager = Browser(f"/newsfeed/home/{account['id']}",dirextension)
                 browser = manager.start()
+                loginInstance = HandleLogin(browser,account)
                 loginInstance.setAccount()
                 try:
                     loginInstance.login()
@@ -64,6 +65,7 @@ def handleCrawlNewFeedVie(account, managerDriver ,dirextension = None, stop_even
                     manager = Browser(f"/newsfeed/home/{account['id']}", dirextension)
                     browser = manager.start()
                     try:
+                        loginInstance = HandleLogin(browser,account)
                         loginInstance.login()
                     except Exception as e:
                         print('Looxi: {e}')
@@ -259,6 +261,7 @@ def handleCrawlNewFeed(account, name, dirextension = None,stop_event=None,system
                         browser = manager.start()
                         browser.get('https://facebook.com')
                         try:
+                            loginInstance = HandleLogin(browser,account)
                             loginInstance.login()
                         except Exception as e:
                             print('Looxi: {e}')
@@ -272,6 +275,7 @@ def handleCrawlNewFeed(account, name, dirextension = None,stop_event=None,system
                         sleep(180)
                         browser.get('https://facebook.com')
                         sleep(1)
+                        loginInstance = HandleLogin(browser,account)
                         loginInstance.setAccount()
                         try:
                             loginInstance.login()
@@ -430,6 +434,7 @@ def crawlNewFeed(account,name,dirextension,stop_event=None,system_account=None):
                         browser = manager.start()
                         browser.get('https://facebook.com')
                         try:
+                            loginInstance = HandleLogin(browser,account)
                             loginInstance.login()
                         except Exception as e:
                             print('Looxi: {e}')
@@ -442,6 +447,7 @@ def crawlNewFeed(account,name,dirextension,stop_event=None,system_account=None):
                         sleep(180)
                         browser.get('https://facebook.com')
                         sleep(1)
+                        loginInstance = HandleLogin(browser,account)
                         loginInstance.setAccount()
                         try:
                             loginInstance.login()
