@@ -1,0 +1,10 @@
+webdriver-manager
+selenium
+dateparser
+requests
+pillow
+pywin32
+pyautogui
+inquirer
+psutil
+rich

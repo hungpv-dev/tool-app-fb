@@ -47,7 +47,7 @@ def submit_page_count(page_input_entry,total_process_label):
     #     print(f"Giá trị không hợp lệ: {e}")
 
 
-def links():
+def link_page():
     frame = get_frame()
     """Hiển thị nội dung trang Home."""
     label = tk.Label(frame, text="Cào bài viết từ đường dẫn", font=("Segoe UI", 20), bg="#f0f2f5")
