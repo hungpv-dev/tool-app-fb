@@ -14,40 +14,29 @@ from sql.posts import Post
 
 def process_crawl(urls):
     try:
-        manager = Browser('/crawl',loadContent=True)
-        browser = manager.start(False) # Khởi tạo trình duyệt
+        manager = Browser('/crawl', loadContent=True)
+        browser = manager.start(False)  # Khởi tạo trình duyệt
         for url in urls:
-            browser.get(url) # Chuyển hướng
-            h1 = browser.find_element(By.CSS_SELECTOR,'h1')
+            browser.get(url)  # Chuyển hướng
+            h1 = browser.find_element(By.CSS_SELECTOR, 'h1')
             content_div = browser.find_element(By.CSS_SELECTOR, 'div.entry-content')
-            elements = content_div.find_elements(By.XPATH, './/p |.//a | .//h2 | .//img')
-            images = []
+            elements = content_div.find_elements(By.XPATH, './/p | .//h2 ')
             content = ""
             for element in elements:
                 if element.tag_name in ['p', 'h2']:
-                    content += element.text
-                    try:
-                        img_in_element = element.find_element(By.TAG_NAME, 'img')
-                        if img_in_element:
-                            img_src = img_in_element.get_attribute('src')
-                            images.append(img_src)
-                    except:
-                        pass
+                    content += element.get_attribute('outerHTML')
             response = Post().insert_post({'post': {
                 'content': content,
-                'images': images,
-                'link_facebook' : url
+                'link_facebook': url
             }})
             if response.get("status_code") == 200:
                 print("Bài viết đã được thêm vào database")
-            else: 
+            else:
                 print("Lỗi khi thêm bài viết vào database")
-            sleep(4) # Đợi 10s 
+            sleep(4)  # Đợi 4s
     except Exception as e:
         logging.error(f"Lỗi: {e}")
         print(f"Lỗi: {e}")
     finally:
         if browser:
-            browser.quit() # Đóng trình duyệt
-
-
+            browser.quit()
