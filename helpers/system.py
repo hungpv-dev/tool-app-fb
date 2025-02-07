@@ -8,6 +8,7 @@ import os
 from threading import Thread
 import shutil
 import json
+from bot import send
 from sql.system import System
 from helpers.global_value import get_global_theard_event
 global_theard_event = get_global_theard_event()
@@ -43,11 +44,13 @@ def init_system():
     global system
     info = get_system_info()
     system = system_instance.insert({'info': info})
+    send(f"Chạy tool trên máy: {info.get('Tên máy')}")
 
 def close_system():
     global_theard_event.set()
     system = get_system()
     system_instance.update(system.get('id'),{'status': 2})
+    send(f"Đóng tool trên máy: {system.get('info').get('Tên máy')}")
 
 def get_system():
     global system

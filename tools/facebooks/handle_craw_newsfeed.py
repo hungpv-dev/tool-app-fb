@@ -209,6 +209,7 @@ def handleCrawlNewFeed(account, name, dirextension = None,stop_event=None,system
 
         manager = None
         browser = None
+        sendNotiKey = True
         # sendNoti = True
         while not stop_event.is_set() and not global_theard_event.is_set():
             try:
@@ -340,6 +341,7 @@ def handleCrawlNewFeed(account, name, dirextension = None,stop_event=None,system
                                             if post_id == '': continue
 
                                             account_cookie_instance.updateCount(account['latest_cookie']['id'], 'counts')
+
                                             data = {
                                                 'post_fb_id': post_id,
                                                 'post_fb_link': clean_url_keep_params(href),
@@ -348,6 +350,15 @@ def handleCrawlNewFeed(account, name, dirextension = None,stop_event=None,system
                                                 'account_id': account.get('id'),
                                             }
                                             res = newfeed_instance.insert(data)
+
+                                            if 'id' in res:
+                                                sendNotiKey = True
+                                            else:
+                                                if sendNotiKey:
+                                                    send(f"{account.get('name')} không có từ khoá nào!")
+                                                    sendNotiKey = False
+                                                continue
+                                                
                                             newsfeed_process_instance.update_process(account.get('id'),'Lưu được 1 đường dẫn bài viết')
                                             print(f"{name}: {data.get('post_fb_link')}")
                                             # log_newsfeed(account, f"* +1 đường dẫn * {str(res.get('data', {}).get('id', 'Không có id'))}")

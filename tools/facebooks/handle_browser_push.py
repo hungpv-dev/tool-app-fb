@@ -127,6 +127,8 @@ class Push:
 
             for thread in threads:
                 thread.join()
+
+            print('Xử lý thành công')
                 
             account_instance = Account()
             try:
@@ -140,9 +142,9 @@ class Push:
         except Exception as e:
             logging.error(f'Lỗi khi push: {e}')
             print(f'Lỗi khi push: {e}')
-            logging.error('Chờ 5 phút trước khi thử lại...')
-            print('Chờ 5 phút trước khi thử lại...')
-            sleep(300)
+            logging.error('Chờ 1 phút trước khi thử lại...')
+            print('Chờ 1 phút trước khi thử lại...')
+            sleep(60)
 
             
     

@@ -158,6 +158,8 @@ class PageChecker:
                 theardAccount.start()
                 threads.append(theardAccount)
 
+                print(f'Danh sách fanpage: {names}')
+
                 send(f'{account.get("name")} cào newsfeed: {", ".join(names)}')
                 for thread in threads:
                     thread.join()

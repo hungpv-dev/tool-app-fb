@@ -150,6 +150,8 @@ def push_page(page,account,dirextension,stop_event,system_account = None):
                 manager.cleanup()
             browser = None
             manager = None
+    print('Dừng xử lý đăng bài page')
+    
 
 
 def browseTime(account):
@@ -255,6 +257,7 @@ def push_list(account, managerDriver, dirextension,stop_event,system_account = N
                                 post_process_instance.update_process(account.get('id'),f"Đăng thành công bài: {post['id']}")
                                 sleep(2)
                                 retry_count.pop(post_id, None)
+                                sleep(300)
                                 break
                             except NoSuchElementException as e:
                                 page_post_instance.update_status(post['id'], {'status': 1})
@@ -291,3 +294,6 @@ def push_list(account, managerDriver, dirextension,stop_event,system_account = N
             logging.error('Lỗi khi đăng bài time,thử lại sau 30s')
             print('Lỗi khi đăng bài time,thử lại sau 30s')
             sleep(30)
+        
+    print('Dừng xử lý đăng bài list')
+    

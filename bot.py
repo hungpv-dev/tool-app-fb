@@ -52,4 +52,3 @@ async def send_message(message):
 
 def send(message):
     asyncio.run(send_message(message))
-
