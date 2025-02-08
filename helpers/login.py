@@ -60,6 +60,7 @@ class HandleLogin:
             self.saveAlowCookie()
             check = self.saveLogin(False)
             sleep(2)
+            print(f'Login success: {check}')
             if check == False:
                 self.updateMainModel('Login với username, password')
                 self.driver.get("https://facebook.com/login")
@@ -110,23 +111,23 @@ class HandleLogin:
                         check = self.pushCode(code)
                     except NoSuchElementException as e:
                         try:
-                            # print('Get email')
-                            # self.driver.find_element(By.NAME,'email')
-                            # logging.info(f'{self.account.get("name")} lấy mã từ Outlook')
-                            # print(f'{self.account.get("name")} lấy mã từ Outlook')
-                            # try:
-                            #     self.updateMainModel('Login với Outlook')
-                            #     print('Chuyển hướng qua email')
-                            #     try:
-                            #         self.toggleType('Email') # Chuyển sang nhận mã từ email
-                            #     except Exception as e:
-                            #         pass 
-                            #     print('Lấy mã từ outlook')
-                            #     code = self.loginEmailAndGetCode() # Lấy code
-                            #     self.updateMainModel(f'Code là: {code}')
-                            #     check = self.pushCode(code)
-                            # except Exception as e:
-                                # print(f'OUTLOOK: {e}')
+                            print('Get email')
+                            self.driver.find_element(By.NAME,'email')
+                            logging.info(f'{self.account.get("name")} lấy mã từ Outlook')
+                            print(f'{self.account.get("name")} lấy mã từ Outlook')
+                            try:
+                                self.updateMainModel('Login với Outlook')
+                                print('Chuyển hướng qua email')
+                                try:
+                                    self.toggleType('Email') # Chuyển sang nhận mã từ email
+                                except Exception as e:
+                                    pass 
+                                print('Lấy mã từ outlook')
+                                code = self.loginEmailAndGetCode() # Lấy code
+                                self.updateMainModel(f'Code là: {code}')
+                                check = self.pushCode(code)
+                            except Exception as e:
+                                print(f'OUTLOOK: {e}')
                                 self.account_instance.update_account(self.account.get('id'),{'status_login':1})
                                 logging.error(f'{self.account.get("name")} lấy mã từ Audio (chiu)')
                                 print(f'{self.account.get("name")} lấy mã từ Audio (chiu)')
@@ -353,6 +354,7 @@ class HandleLogin:
     def saveLogin(self,saveCookie = True):
         check = False
         try:
+            print('Check block')
             checkBlock = self.checkBlock()
             # print(f"Check block: {checkBlock}")
             if checkBlock:
@@ -365,6 +367,7 @@ class HandleLogin:
             sleep(2)
             clickOk(self.driver)
 
+            print('Get thẻ open profile')
             self.driver.find_element(By.XPATH, push['openProfile'])
             cookies = self.driver.get_cookies()
             dataUpdate = {
@@ -380,6 +383,7 @@ class HandleLogin:
             self.updateMainModel(f'Login thành công!')
             self.checkCapcha = True
         except Exception as e:
+            print(f'Lỗi save: {e}')
             self.account_instance.update_account(self.account.get('id'),{'status_login':1})
         return check
     

@@ -49,8 +49,9 @@ def handleCrawlNewFeedVie(account, managerDriver ,dirextension = None, stop_even
     while not stop_event.is_set() and not global_theard_event.is_set():
         try:
             if not init:
-                manager = Browser(f"/newsfeed/home/{account['id']}",dirextension)
+                manager = Browser(f"/newsfeed/{str(account.get('id'))}/{str(uuid.uuid4())}",dirextension)
                 browser = manager.start()
+                loginInstance = HandleLogin(browser,account)
                 loginInstance.setAccount()
                 try:
                     loginInstance.login()
@@ -64,6 +65,7 @@ def handleCrawlNewFeedVie(account, managerDriver ,dirextension = None, stop_even
                     manager = Browser(f"/newsfeed/home/{account['id']}", dirextension)
                     browser = manager.start()
                     try:
+                        loginInstance = HandleLogin(browser,account)
                         loginInstance.login()
                     except Exception as e:
                         print('Looxi: {e}')
@@ -109,12 +111,8 @@ def handleCrawlNewFeedVie(account, managerDriver ,dirextension = None, stop_even
                         profile_button = browser.find_element(By.XPATH, push['openProfile'])
                         loginInstance.updateStatusAcount(account.get('id'),3)
                     except NoSuchElementException as e:
-                        if sendNoti:
-                            send(f"Tài khoản {account.get('name')} không thể đăng nhập!")
-                            sendNoti = False
-
                         while not stop_event.is_set() and not global_theard_event.is_set():
-                            checkLogin = loginInstance.loginFacebook(False)
+                            checkLogin = loginInstance.loginFacebook(sendNoti)
                             if checkLogin == False:
                                 updateSystemMessage(system_account,'Login thất bại')
                                 print('Đợi 1p rồi thử login lại!')
@@ -122,6 +120,9 @@ def handleCrawlNewFeedVie(account, managerDriver ,dirextension = None, stop_even
                             else:
                                 send(f"Tài khoản {account.get('name')} bắt đầu cào newsfeed!")
                                 break
+                        if sendNoti:
+                            send(f"Tài khoản {account.get('name')} không thể đăng nhập!")
+                            sendNoti = False
                         sleep(2)
                     except Exception as e:
                         raise e
@@ -203,17 +204,17 @@ def handleCrawlNewFeed(account, name, dirextension = None,stop_event=None,system
         error_instance = Error()
         account_cookie_instance = AccountCookies()
         account_id = account.get('id', 'default_id')
-        pathProfile = f"/newsfeed/{str(account_id)}/{str(uuid.uuid4())}"
         print(f'Chuyển hướng tới fanpage: {name}')
 
         manager = None
         browser = None
+        sendNotiKey = True
         # sendNoti = True
         while not stop_event.is_set() and not global_theard_event.is_set():
             try:
                 # while not stop_event.is_set() and not global_theard_event.is_set():
                     # try:
-                manager = Browser(pathProfile,dirextension)
+                manager = Browser(f"/newsfeed/{str(account_id)}/{str(uuid.uuid4())}",dirextension)
                 browser = manager.start()
                 sleep(5)
                     #     break
@@ -256,10 +257,11 @@ def handleCrawlNewFeed(account, name, dirextension = None,stop_event=None,system
                 while not stop_event.is_set() and not global_theard_event.is_set(): 
                     if browser is None or not browser.service.is_connectable():
                         print("Trình duyệt đã bị đóng. Khởi chạy lại...")
-                        manager = Browser(pathProfile, dirextension)
+                        manager = Browser(f"/newsfeed/{str(account_id)}/{str(uuid.uuid4())}", dirextension)
                         browser = manager.start()
                         browser.get('https://facebook.com')
                         try:
+                            loginInstance = HandleLogin(browser,account)
                             loginInstance.login()
                         except Exception as e:
                             print('Looxi: {e}')
@@ -273,6 +275,7 @@ def handleCrawlNewFeed(account, name, dirextension = None,stop_event=None,system
                         sleep(180)
                         browser.get('https://facebook.com')
                         sleep(1)
+                        loginInstance = HandleLogin(browser,account)
                         loginInstance.setAccount()
                         try:
                             loginInstance.login()
@@ -337,6 +340,7 @@ def handleCrawlNewFeed(account, name, dirextension = None,stop_event=None,system
                                             if post_id == '': continue
 
                                             account_cookie_instance.updateCount(account['latest_cookie']['id'], 'counts')
+
                                             data = {
                                                 'post_fb_id': post_id,
                                                 'post_fb_link': clean_url_keep_params(href),
@@ -345,6 +349,15 @@ def handleCrawlNewFeed(account, name, dirextension = None,stop_event=None,system
                                                 'account_id': account.get('id'),
                                             }
                                             res = newfeed_instance.insert(data)
+
+                                            if 'id' in res:
+                                                sendNotiKey = True
+                                            else:
+                                                if sendNotiKey:
+                                                    send(f"{account.get('name')} không có từ khoá nào!")
+                                                    sendNotiKey = False
+                                                continue
+                                                
                                             newsfeed_process_instance.update_process(account.get('id'),'Lưu được 1 đường dẫn bài viết')
                                             print(f"{name}: {data.get('post_fb_link')}")
                                             # log_newsfeed(account, f"* +1 đường dẫn * {str(res.get('data', {}).get('id', 'Không có id'))}")
@@ -382,7 +395,6 @@ def handleCrawlNewFeed(account, name, dirextension = None,stop_event=None,system
 def crawlNewFeed(account,name,dirextension,stop_event=None,system_account=None):
     try:
         account_id = account.get('id', 'default_id')
-        pathProfile = f"/newsfeed/{str(account_id)}/{str(uuid.uuid4())}"
         account_cookie_instance = AccountCookies()
         from tools.facebooks.crawl_content_post import CrawlContentPost
         newfeed_instance = NewFeedModel()
@@ -392,7 +404,7 @@ def crawlNewFeed(account,name,dirextension,stop_event=None,system_account=None):
         browser = None
         while not stop_event.is_set() and not global_theard_event.is_set():
             try:
-                manager = Browser(pathProfile,dirextension)
+                manager = Browser(f"/newsfeed/{str(account_id)}/{str(uuid.uuid4())}",dirextension)
                 browser = manager.start()
                 sleep(5)
                 
@@ -427,10 +439,11 @@ def crawlNewFeed(account,name,dirextension,stop_event=None,system_account=None):
                 while not stop_event.is_set() and not global_theard_event.is_set():
                     if browser is None or not browser.service.is_connectable():
                         print("Trình duyệt đã bị đóng. Khởi chạy lại...")
-                        manager = Browser(pathProfile, dirextension)
+                        manager = Browser(f"/newsfeed/{str(account_id)}/{str(uuid.uuid4())}", dirextension)
                         browser = manager.start()
                         browser.get('https://facebook.com')
                         try:
+                            loginInstance = HandleLogin(browser,account)
                             loginInstance.login()
                         except Exception as e:
                             print('Looxi: {e}')
@@ -443,6 +456,7 @@ def crawlNewFeed(account,name,dirextension,stop_event=None,system_account=None):
                         sleep(180)
                         browser.get('https://facebook.com')
                         sleep(1)
+                        loginInstance = HandleLogin(browser,account)
                         loginInstance.setAccount()
                         try:
                             loginInstance.login()

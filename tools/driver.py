@@ -25,7 +25,10 @@ class Browser:
         
         if os.path.exists(base_profile_dir):
             if base_profile_dir != './temp/profiles/crawl':
-                shutil.rmtree(base_profile_dir)
+                try:
+                    shutil.rmtree(base_profile_dir)
+                except PermissionError:
+                    pass
 
         if not os.path.exists(base_profile_dir):
             os.makedirs(base_profile_dir, mode=0o755)
@@ -114,5 +117,8 @@ class Browser:
         """Remove temporary directory if created."""
         if hasattr(self, 'profile_dir') and self.profile_dir:
             import shutil
-            shutil.rmtree(self.profile_dir, ignore_errors=True)
+            try:
+                shutil.rmtree(self.profile_dir, ignore_errors=True)
+            except PermissionError:
+                pass
 
