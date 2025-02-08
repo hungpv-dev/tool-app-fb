@@ -171,13 +171,16 @@
 # send('Heello')
 
 
-email = "whitebeargnw808574@hotmail.com"
-pwdEmail = "vhE166nqFE"
-server = "outlook.office365.com"
-import win32com.client
-outlook = win32com.client.Dispatch("Outlook.Application").GetNamespace("MAPI")
-inbox = outlook.GetDefaultFolder(6) 
-messages = inbox.Items
-message = messages.GetLast()
-body_content = message.body
-print(body_content)
+
+from sql.model import Model
+
+proxies = {
+    "user": "GGDrSBwhlOfhj9j",
+    "pass": "9ExDoUxRkGSK4w9",
+    "ip": "207.22.46.59",
+    "port": "41812"
+}
+test_api = Model()
+test_api.base_url = 'https://httpbin.org'
+test_api.setProxy(proxies)
+print(test_api.get("/ip"))

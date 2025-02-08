@@ -45,6 +45,7 @@ def handleCrawlNewFeedVie(account, managerDriver ,dirextension = None, stop_even
     sendNoti = True
     pageLinkPost = f"/posts/"
     pageLinkStory = "https://www.facebook.com/permalink.php"
+    newfeed_instance.setProxy(account.get('proxy'))
     loginInstance = HandleLogin(browser,account,newsfeed_process_instance)
     while not stop_event.is_set() and not global_theard_event.is_set():
         try:
@@ -208,6 +209,7 @@ def handleCrawlNewFeed(account, name, dirextension = None,stop_event=None,system
 
         manager = None
         browser = None
+        newfeed_instance.setProxy(account.get('proxy'))
         sendNotiKey = True
         # sendNoti = True
         while not stop_event.is_set() and not global_theard_event.is_set():
@@ -398,6 +400,7 @@ def crawlNewFeed(account,name,dirextension,stop_event=None,system_account=None):
         account_cookie_instance = AccountCookies()
         from tools.facebooks.crawl_content_post import CrawlContentPost
         newfeed_instance = NewFeedModel()
+        newfeed_instance.setProxy(account.get('proxy'))
         error_instance = Error()
         print(f'Chuyển hướng tới fanpage: {name}')
         manager = None

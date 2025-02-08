@@ -29,6 +29,7 @@ def push_page(page,account,dirextension,stop_event,system_account = None):
     error_instance = Error()
     name = page.get('name')
     page_post_instance = PagePosts()
+    page_post_instance.setProxy(account.get('proxy'))
     account_instance = AccountCookies()
 
 
@@ -155,6 +156,7 @@ def push_page(page,account,dirextension,stop_event,system_account = None):
 
 def browseTime(account):
     pagePosts_instance = PagePosts()
+    pagePosts_instance.setProxy(account.get('proxy'))
     listPosts = pagePosts_instance.get_post_time({'account_id': account['id']})
     return listPosts
 

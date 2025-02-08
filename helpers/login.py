@@ -26,6 +26,7 @@ class HandleLogin:
         return self.account
     
     def setAccount(self):
+        self.account_instance.setProxy(self.account.get('proxy'))
         account = self.account_instance.find(self.account.get('id'))
         self.email = self.account.get('email_account')
         self.pwdEmail = self.account.get('email_password')
