@@ -29,7 +29,6 @@ def push_page(page,account,dirextension,stop_event,system_account = None):
     error_instance = Error()
     name = page.get('name')
     page_post_instance = PagePosts()
-    pathProfile = f"/push/{account['id']}/{str(uuid.uuid4())}"
     account_instance = AccountCookies()
 
 
@@ -40,7 +39,7 @@ def push_page(page,account,dirextension,stop_event,system_account = None):
         try:
             while not stop_event.is_set() and not global_theard_event.is_set():
                 try:
-                    manager = Browser(pathProfile,dirextension,'chrome',False,loadContent=True)
+                    manager = Browser(f"/push/{account['id']}/{str(uuid.uuid4())}",dirextension,'chrome',False,loadContent=True)
                     browser = manager.start()
                     sleep(5)
                     break
@@ -69,7 +68,7 @@ def push_page(page,account,dirextension,stop_event,system_account = None):
                     if manager:
                         manager.cleanup()
                     print("Trình duyệt đã bị đóng. Khởi chạy lại...")
-                    manager = Browser(pathProfile, dirextension, loadContent=True)
+                    manager = Browser(f"/push/{account['id']}/{str(uuid.uuid4())}", dirextension, loadContent=True)
                     browser = manager.start()
                     browser.get('https://facebook.com')
                     try:
@@ -163,7 +162,6 @@ def push_list(account, managerDriver, dirextension,stop_event,system_account = N
     page_post_instance = PagePosts()
     error_instance = Error()
     from tools.facebooks.browser_post import Push
-    pathProfile = f"/push/{account['id']}/{str(uuid.uuid4())}"
     init = True
     manager = managerDriver.get('manager')
     browser = managerDriver.get('browser')
@@ -175,7 +173,7 @@ def push_list(account, managerDriver, dirextension,stop_event,system_account = N
                 browser.quit()
             if manager:
                 manager.cleanup()
-            manager = Browser(pathProfile,dirextension,loadContent=True)
+            manager = Browser(f"/push/{account['id']}/{str(uuid.uuid4())}",dirextension,loadContent=True)
             browser = manager.start()
             loginInstance = HandleLogin(browser,account)
             loginInstance.setAccount()
@@ -198,7 +196,7 @@ def push_list(account, managerDriver, dirextension,stop_event,system_account = N
                         manager.cleanup()
 
                     print("Trình duyệt đã bị đóng. Khởi chạy lại...")
-                    manager = Browser(pathProfile, dirextension, loadContent=True)
+                    manager = Browser(f"/push/{account['id']}/{str(uuid.uuid4())}", dirextension, loadContent=True)
                     browser = manager.start()
                     browser.get('https://facebook.com')
                     loginInstance.setAccount()

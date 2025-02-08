@@ -49,7 +49,7 @@ def handleCrawlNewFeedVie(account, managerDriver ,dirextension = None, stop_even
     while not stop_event.is_set() and not global_theard_event.is_set():
         try:
             if not init:
-                manager = Browser(f"/newsfeed/home/{account['id']}",dirextension)
+                manager = Browser(f"/newsfeed/{str(account.get('id'))}/{str(uuid.uuid4())}",dirextension)
                 browser = manager.start()
                 loginInstance = HandleLogin(browser,account)
                 loginInstance.setAccount()
@@ -204,7 +204,6 @@ def handleCrawlNewFeed(account, name, dirextension = None,stop_event=None,system
         error_instance = Error()
         account_cookie_instance = AccountCookies()
         account_id = account.get('id', 'default_id')
-        pathProfile = f"/newsfeed/{str(account_id)}/{str(uuid.uuid4())}"
         print(f'Chuyển hướng tới fanpage: {name}')
 
         manager = None
@@ -215,7 +214,7 @@ def handleCrawlNewFeed(account, name, dirextension = None,stop_event=None,system
             try:
                 # while not stop_event.is_set() and not global_theard_event.is_set():
                     # try:
-                manager = Browser(pathProfile,dirextension)
+                manager = Browser(f"/newsfeed/{str(account_id)}/{str(uuid.uuid4())}",dirextension)
                 browser = manager.start()
                 sleep(5)
                     #     break
@@ -258,7 +257,7 @@ def handleCrawlNewFeed(account, name, dirextension = None,stop_event=None,system
                 while not stop_event.is_set() and not global_theard_event.is_set(): 
                     if browser is None or not browser.service.is_connectable():
                         print("Trình duyệt đã bị đóng. Khởi chạy lại...")
-                        manager = Browser(pathProfile, dirextension)
+                        manager = Browser(f"/newsfeed/{str(account_id)}/{str(uuid.uuid4())}", dirextension)
                         browser = manager.start()
                         browser.get('https://facebook.com')
                         try:
@@ -396,7 +395,6 @@ def handleCrawlNewFeed(account, name, dirextension = None,stop_event=None,system
 def crawlNewFeed(account,name,dirextension,stop_event=None,system_account=None):
     try:
         account_id = account.get('id', 'default_id')
-        pathProfile = f"/newsfeed/{str(account_id)}/{str(uuid.uuid4())}"
         account_cookie_instance = AccountCookies()
         from tools.facebooks.crawl_content_post import CrawlContentPost
         newfeed_instance = NewFeedModel()
@@ -406,7 +404,7 @@ def crawlNewFeed(account,name,dirextension,stop_event=None,system_account=None):
         browser = None
         while not stop_event.is_set() and not global_theard_event.is_set():
             try:
-                manager = Browser(pathProfile,dirextension)
+                manager = Browser(f"/newsfeed/{str(account_id)}/{str(uuid.uuid4())}",dirextension)
                 browser = manager.start()
                 sleep(5)
                 
@@ -441,7 +439,7 @@ def crawlNewFeed(account,name,dirextension,stop_event=None,system_account=None):
                 while not stop_event.is_set() and not global_theard_event.is_set():
                     if browser is None or not browser.service.is_connectable():
                         print("Trình duyệt đã bị đóng. Khởi chạy lại...")
-                        manager = Browser(pathProfile, dirextension)
+                        manager = Browser(f"/newsfeed/{str(account_id)}/{str(uuid.uuid4())}", dirextension)
                         browser = manager.start()
                         browser.get('https://facebook.com')
                         try:
