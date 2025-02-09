@@ -38,7 +38,19 @@ class CrawlContentPost:
         try:
             self.browser.get(post['link'])
             sleep(1)
-            closeModal(0,self.browser)
+            modal = None
+            for modalXPath in types['modal']:
+                try:
+                    modal = self.browser.find_element(By.XPATH, modalXPath)
+                    break
+                except Exception as e:
+                    pass
+            if modal:
+                aria_posinset = modal.get_attribute("aria-posinset")
+                if aria_posinset is None:
+                    closeModal(1,self.browser)
+                else:
+                    closeModal(0,self.browser)
             sleep(1)
             self.crawlContentPost(page, post, his)
         except Exception as e:
@@ -160,6 +172,8 @@ class CrawlContentPost:
             
             if listCount:
                 data['like'] = listCount[1] if len(listCount) > 1 else 0
+                if data['like'] == 'Comment':
+                    data['like'] = 0
                 for dyamic in listCount:
                     if selectDyamic['comment'] in dyamic:
                         data['comment'] = dyamic
@@ -299,6 +313,14 @@ class CrawlContentPost:
                 'post': data,
                 'comments': dataComment
             }
+        import json
+        merged_data = {
+            "data": data,
+            "dataComment": dataComment
+        }
+
+        # Chuyển đổi thành JSON với indent=4
+        print(json.dumps(merged_data, indent=4))
         self.insertPostAndComment(data,dataComment, his)
         
     def likePost(self):
