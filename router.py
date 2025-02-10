@@ -6,6 +6,7 @@ from pages.logs import logs_page
 from pages.settings import settings_page
 from pages.login import login_page
 from pages.links import link_page
+from pages.update import update_page
 
 router = {
     'home' : main_page,
@@ -18,4 +19,5 @@ router = {
     'settings': settings_page,
     'login': login_page,
     'links': link_page,
+    'update': update_page,
 }

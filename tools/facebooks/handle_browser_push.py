@@ -173,6 +173,12 @@ class Push:
             swichNow = self.browser.find_element(By.XPATH, push['switchNow'])
             swichNow.click()
         except Exception as e:
+            try:
+                swichNow = self.browser.find_element(By.XPATH, '//*[@aria-label="Switch"]')
+                swichNow.click()
+            except Exception as e:
+                pass
+
             # logging.error('-> Mở popup thông tin cá nhân!')
             # print('-> Mở popup thông tin cá nhân!')
             # profile_button = WebDriverWait(self.browser, 10).until(
@@ -213,6 +219,9 @@ class Push:
         # sleep(2)
         # self.browser.execute_script("document.body.style.zoom='0.4';")
         sleep(2)
+        clickOk(self.browser)
+        sleep(1)
+
         try:
             logging.error('==> Bắt đầu đăng bài')
             print('==> Bắt đầu đăng bài')
@@ -237,6 +246,8 @@ class Push:
             input_element = self.browser.switch_to.active_element
             logging.error('- Gán nội dung bài viết!')
             print('- Gán nội dung bài viết!')
+            clickOk(self.browser)
+            sleep(1)
             copy_and_paste_text(post['content'],input_element)
             # input_element.send_keys(post['content'])
             

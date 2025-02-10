@@ -389,7 +389,9 @@ class HandleLogin:
         return check
     
     def checkBlock(self):
+        sleep(2)
         clickOk(self.driver)
+        print('CLick ok')
 
         messages = [
             "your account has been locked",
@@ -404,6 +406,9 @@ class HandleLogin:
                     try:
                         self.driver.find_element(By.XPATH, push['openProfile'])
                         self.driver.get('https://facebook.com/home.php')
+                        sleep(2)
+                        clickOk(self.driver)
+                        sleep(1)
                     except NoSuchElementException:
                         pass
 

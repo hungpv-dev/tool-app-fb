@@ -82,6 +82,7 @@ def push_page(page,account,dirextension,stop_event,system_account = None):
                 pageUP = page_post_instance.get_page_up({'page_id': page["id"],'account_id':account['id']})
                 
                 try:
+                    clickOk(browser)
                     profile_button = browser.find_element(By.XPATH, pushType['openProfile'])
                 except NoSuchElementException as e:
                     try:
@@ -102,8 +103,10 @@ def push_page(page,account,dirextension,stop_event,system_account = None):
                         try:
                             post_process_instance.update_process(account.get('id'),f"Xử lý đăng bài: {pageUP['id']}")
                             res = account_instance.updateCount(cookie.get('id'),'counts')
+                            print(f'{page.get("name")} chuyển hướng')
                             name = push_instance.switchPage(page,stop_event)
                             profile_button = browser.find_element(By.XPATH, pushType['openProfile'])
+                            print(f'{page.get("name")} Push fanpage')
                             push_instance.push(page,pageUP,name)
                             page_post_instance.update_status(pageUP['id'],{
                                 'status':2,
@@ -134,8 +137,8 @@ def push_page(page,account,dirextension,stop_event,system_account = None):
                                 break
                             sleep(5)
                 else: 
-                    logging.error('Chưa có bài viết nào trong hàng chờ, chờ 1p để tiếp tục....')
-                    print('Chưa có bài viết nào trong hàng chờ, chờ 1p để tiếp tục....')
+                    logging.error(f'{page.get("name")} không có bài nào, chờ 1p...')
+                    print(f'{page.get("name")} không có bài nào, chờ 1p...')
                     sleep(60)
         except Exception as e:
             error_instance.insertContent(e)

@@ -34,5 +34,8 @@ def setup_menu():
 
     menubar.add_command(label="Xem log", command=lambda: render('logs'))
 
+    menubar.add_command(label="Cập nhật", command=lambda: render('update'))
+
     # Áp dụng menu vào cửa sổ chính
     root.config(menu=menubar)
+
