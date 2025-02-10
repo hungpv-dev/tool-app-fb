@@ -176,6 +176,11 @@ class Push:
             try:
                 swichNow = self.browser.find_element(By.XPATH, '//*[@aria-label="Switch"]')
                 swichNow.click()
+                sleep(4)
+                clickOk(self.browser)
+                sleep(1)
+                swichNow = self.browser.find_element(By.XPATH, '(//*[@aria-label="Switch"])[last()]')
+                swichNow.click()
             except Exception as e:
                 pass
 
@@ -260,7 +265,9 @@ class Push:
                     if images is not None and len(images) > 0:
                         photo_video_element = parent_form.find_element(By.XPATH, './/div[@aria-label="Photo/video"]')
                         photo_video_element.click()
-                        sleep(5)
+                        sleep(4)
+                        clickOk(self.browser)
+                        sleep(1)
                         logging.error('- Copy và dán hình ảnh')
                         print('- Copy và dán hình ảnh')
                         for src in images:
@@ -273,7 +280,9 @@ class Push:
                 except Exception as e:
                     logging.error(f'Lỗi khi thêm hình ảnh: {e}')
                     print(f'Lỗi khi thêm hình ảnh: {e}')
-            sleep(5)
+            sleep(4)
+            clickOk(self.browser)
+            sleep(1)
             logging.error('Đăng bài')
             print('Đăng bài')
             parent_form.submit()

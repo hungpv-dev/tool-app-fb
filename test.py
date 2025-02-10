@@ -184,30 +184,3 @@
 # test_api.base_url = 'https://httpbin.org'
 # test_api.setProxy(proxies)
 # print(test_api.get("/ip"))
-
-import requests
-import tkinter.messagebox as messagebox
-
-def download_update(url):
-    """Tải xuống file cập nhật từ URL."""
-    new_file = "app_new.exe"
-    try:
-        # Thực hiện yêu cầu GET để tải file
-        response = requests.get(url, stream=True)
-        # Kiểm tra nếu yêu cầu thành công (status code 200)
-        if response.status_code == 200:
-            with open(new_file, "wb") as file:
-                for chunk in response.iter_content(chunk_size=1024):
-                    if chunk:
-                        file.write(chunk)
-            return new_file
-        else:
-            messagebox.showerror("Lỗi", "Không thể tải tệp. Vui lòng kiểm tra URL.")
-            return None
-    except Exception as e:
-        messagebox.showerror("Lỗi", f"Không thể tải file cập nhật: {e}")
-        return None
-
-# Sử dụng URL tải xuống trực tiếp
-download_update('https://drive.google.com/uc?export=download&id=1-_4zIT8OnGvsloNTyNxrUMkkIFFBrr-x')
-

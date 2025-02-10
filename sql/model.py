@@ -13,12 +13,13 @@ class Model:
 
     def setProxy(self, proxy):
             try:
-                proxies = {
-                    "http": f"http://{proxy.get('user')}:{proxy.get('pass')}@{proxy.get('ip')}:{proxy.get('port')}",
-                    "https": f"http://{proxy.get('user')}:{proxy.get('pass')}@{proxy.get('ip')}:{proxy.get('port')}"
-                }
-                self.proxy = proxies
-            except Exception as e: 
+                if proxies:
+                    proxies = {
+                        "http": f"http://{proxy.get('user')}:{proxy.get('pass')}@{proxy.get('ip')}:{proxy.get('port')}",
+                        "https": f"http://{proxy.get('user')}:{proxy.get('pass')}@{proxy.get('ip')}:{proxy.get('port')}"
+                    }
+                    self.proxy = proxies
+            except Exception as e:  
                 print(f'Lỗi khi set proxy: {e}')
                 logging.error(f'Lỗi khi set proxy: {e}')
                 pass

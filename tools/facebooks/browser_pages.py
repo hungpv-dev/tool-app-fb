@@ -159,8 +159,8 @@ class BrowserFanpage:
             dataUpdatePage = {}
             try:
                 name_page = self.browser.find_element(By.XPATH, '(//h1)[last()]')
-                name = name_page.text.strip()
-                dataUpdatePage['name'] = name
+                name = name_page.text.strip() if name_page.text.strip() != '' else page.get('name')
+                dataUpdatePage['name'] = name 
 
                 if name == 'This site can’t be reached':
                     # fanpage_process_instance.update_process(tab_id,f'{name}: Trang không load được, đợi 30s')
@@ -177,6 +177,8 @@ class BrowserFanpage:
                 except:
                     dataUpdatePage['verified'] = 0
                     pass
+
+                print(name)
                 
                 try: # Lấy lượt like
                     likes = self.browser.find_element(By.CSS_SELECTOR, types['friends_likes'])
