@@ -19,15 +19,18 @@ def process_crawl(urls):
         for url in urls:
             browser.get(url)  # Chuyển hướng
             h1 = browser.find_element(By.CSS_SELECTOR, 'h1')
+            title = h1.text
             content_div = browser.find_element(By.CSS_SELECTOR, 'div.entry-content')
             elements = content_div.find_elements(By.XPATH, './/p | .//h2 ')
-            content = ""
+            content = ''
             for element in elements:
                 if element.tag_name in ['p', 'h2']:
                     content += element.get_attribute('outerHTML')
             response = Post().insert_post({'post': {
                 'content': content,
-                'link_facebook': url
+                'link_facebook': url,
+                "title" : title,
+                'images' : []
             }})
             if response.get("status_code") == 200:
                 print("Bài viết đã được thêm vào database")
