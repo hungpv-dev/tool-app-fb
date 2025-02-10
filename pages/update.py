@@ -46,8 +46,9 @@ def start_update(url_entry):
     
     messagebox.showinfo("Cập nhật", "Đang tải bản cập nhật. Vui lòng đợi...")
     new_file = download_update(url)
-    if new_file:
-        replace_and_restart(new_file)
+    messagebox.showinfo("Cập nhật", "Cập nhật hoàn tất. Ứng dụng sẽ khởi động lại.")
+    # if new_file:
+    #     replace_and_restart(new_file)
 
 def update_page():
     """Giao diện cập nhật phần mềm."""
