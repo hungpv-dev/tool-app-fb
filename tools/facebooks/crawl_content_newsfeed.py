@@ -64,6 +64,8 @@ class CrawContentNewsfeed:
                 if sendNoti:
                     send(f"Tài khoản {self.account.get('name')} không thể đăng nhập!")
                     sendNoti = False
+                if self.browser is None or not self.browser.service.is_connectable():
+                    raise e
             except Exception as e:
                 print(f'Lỗi: {e}')
                 raise e
@@ -155,6 +157,8 @@ class PageChecker:
                 theardAccount = Thread(target=handleCrawlNewFeedVie, args=(account, managerDriver, self.dirextension, stop_event,self.system_account))
                 theardAccount.start()
                 threads.append(theardAccount)
+
+                print(f'Danh sách fanpage: {names}')
 
                 send(f'{account.get("name")} cào newsfeed: {", ".join(names)}')
                 for thread in threads:

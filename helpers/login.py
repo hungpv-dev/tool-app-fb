@@ -26,6 +26,7 @@ class HandleLogin:
         return self.account
     
     def setAccount(self):
+        self.account_instance.setProxy(self.account.get('proxy'))
         account = self.account_instance.find(self.account.get('id'))
         self.email = self.account.get('email_account')
         self.pwdEmail = self.account.get('email_password')
@@ -60,6 +61,7 @@ class HandleLogin:
             self.saveAlowCookie()
             check = self.saveLogin(False)
             sleep(2)
+            print(f'Login success: {check}')
             if check == False:
                 self.updateMainModel('Login với username, password')
                 self.driver.get("https://facebook.com/login")
@@ -126,7 +128,7 @@ class HandleLogin:
                             #     self.updateMainModel(f'Code là: {code}')
                             #     check = self.pushCode(code)
                             # except Exception as e:
-                                # print(f'OUTLOOK: {e}')
+                                print(f'OUTLOOK: {e}')
                                 self.account_instance.update_account(self.account.get('id'),{'status_login':1})
                                 logging.error(f'{self.account.get("name")} lấy mã từ Audio (chiu)')
                                 print(f'{self.account.get("name")} lấy mã từ Audio (chiu)')
@@ -353,6 +355,7 @@ class HandleLogin:
     def saveLogin(self,saveCookie = True):
         check = False
         try:
+            print('Check block')
             checkBlock = self.checkBlock()
             # print(f"Check block: {checkBlock}")
             if checkBlock:
@@ -365,6 +368,7 @@ class HandleLogin:
             sleep(2)
             clickOk(self.driver)
 
+            print('Get thẻ open profile')
             self.driver.find_element(By.XPATH, push['openProfile'])
             cookies = self.driver.get_cookies()
             dataUpdate = {
@@ -380,11 +384,14 @@ class HandleLogin:
             self.updateMainModel(f'Login thành công!')
             self.checkCapcha = True
         except Exception as e:
+            print(f'Lỗi save: {e}')
             self.account_instance.update_account(self.account.get('id'),{'status_login':1})
         return check
     
     def checkBlock(self):
+        sleep(2)
         clickOk(self.driver)
+        print('CLick ok')
 
         messages = [
             "your account has been locked",
@@ -399,6 +406,9 @@ class HandleLogin:
                     try:
                         self.driver.find_element(By.XPATH, push['openProfile'])
                         self.driver.get('https://facebook.com/home.php')
+                        sleep(2)
+                        clickOk(self.driver)
+                        sleep(1)
                     except NoSuchElementException:
                         pass
 
