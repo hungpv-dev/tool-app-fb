@@ -29,22 +29,21 @@ def find_div_with_most_p_tags(div_blocks):
     return main_div, num_p_tags
 
 def extract_relevant_tags(main_div):
-    relevant_html = ""
-    if (main_div):
-        for tag in main_div.find_all(recursive=False):
-            if tag.name not in ['div', 'script']:
-                relevant_html += str(tag)
-            elif tag.name == 'div':
-                for sub_tag in tag.find_all(recursive=False):
-                    if sub_tag.name not in ['div', 'script']:
-                        relevant_html += str(sub_tag)
-    return relevant_html
+    if main_div:
+        # Loại bỏ các thẻ <div> con
+        for div in main_div.find_all('div'):
+            div.decompose()
+        return main_div.decode_contents()
+    return ""
+
+from helpers.fb import clean_facebook_url_redirect
 
 def process_crawl(urls):
     try:
         manager = Browser('/crawl', loadContent=True)
         browser = manager.start(False)  # Khởi tạo trình duyệt
         for url in urls:
+            url = clean_facebook_url_redirect(url)
             browser.get(url)  # Chuyển hướng
             h1 = browser.find_element(By.CSS_SELECTOR, 'h1')
             title = h1.text
@@ -54,7 +53,6 @@ def process_crawl(urls):
             div_blocks = extract_div_with_p_tags(html)
             main_div, num_p_tags = find_div_with_most_p_tags(div_blocks)
             relevant_html = extract_relevant_tags(main_div)
-            print(relevant_html)
             response = Post().insert_post_web({'post': {
                 'content': relevant_html,
                 'link_facebook': url,
@@ -65,7 +63,7 @@ def process_crawl(urls):
                 print("Bài viết đã được thêm vào database")
             else:
                 print("Lỗi khi thêm bài viết vào database")
-            sleep(10)  # Đợi 4s
+            sleep(5)  # Đợi 10s
     except Exception as e:
         logging.error(f"Lỗi: {e}")
         print(f"Lỗi: {e}")
