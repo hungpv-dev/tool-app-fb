@@ -11,3 +11,5 @@ class Post(Model):
 
     def get_none_post_ids(self, data):
         return self.post("post-web/none", data=data)
+    def insert_post_web(self, data):
+        return self.post("post-web/store", data=data)
