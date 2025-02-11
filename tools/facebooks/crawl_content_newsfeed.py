@@ -40,7 +40,7 @@ class CrawContentNewsfeed:
         loginInstance = HandleLogin(self.browser,self.account,newsfeed_process_instance)
         sendNoti = True
         while not stop_event.is_set() and not global_theard_event.is_set():
-            if account is None:
+            if self.account is None:
                 break
             try:
                 newsfeed_process_instance.update_process(self.account.get('id'),'Bắt đầu đăng nhập')
