@@ -1,4 +1,3 @@
-import sys
 from tools.driver import Browser
 from tools.facebooks.browser_pages import BrowserFanpage
 from time import sleep

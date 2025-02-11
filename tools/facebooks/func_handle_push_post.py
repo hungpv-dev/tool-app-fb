@@ -34,11 +34,15 @@ def push_page(page,account,dirextension,stop_event,system_account = None):
 
 
     while not stop_event.is_set() and not global_theard_event.is_set():
+        if account is None:
+            break
         manager = None
         browser = None
         loginInstance = None
         try:
             while not stop_event.is_set() and not global_theard_event.is_set():
+                if account is None:
+                    break
                 try:
                     manager = Browser(f"/push/{account['id']}/{str(uuid.uuid4())}",dirextension,'chrome',False,loadContent=True)
                     browser = manager.start()
@@ -63,6 +67,8 @@ def push_page(page,account,dirextension,stop_event,system_account = None):
             updateSystemMessage(system_account,f'Bắt đầu đăng page: {name}')
             retry_count = {}
             while not stop_event.is_set() and not global_theard_event.is_set():
+                if account is None:
+                    break
                 if browser is None or not browser.service.is_connectable():
                     if browser:
                         browser.quit()
@@ -133,7 +139,8 @@ def push_page(page,account,dirextension,stop_event,system_account = None):
                                     'cookie_id': cookie['id']
                                 })
                                 logging.error(f"Bài viết {pot_id} đăng lỗi quá 3 lần. Bỏ qua.")
-                                send(f'{account.get("name")} không đăng được bài viết')
+                                if account.get("name"):
+                                    send(f'{account.get("name")} không đăng được bài viết')
                                 break
                             sleep(5)
                 else: 
@@ -172,6 +179,8 @@ def push_list(account, managerDriver, dirextension,stop_event,system_account = N
     browser = managerDriver.get('browser')
     sendNoti = True
     while not stop_event.is_set() and not global_theard_event.is_set():
+        if account is None:
+            break
         retry_count = {}
         if not init:
             if browser:
@@ -194,6 +203,8 @@ def push_list(account, managerDriver, dirextension,stop_event,system_account = N
             push = Push(browser,account,dirextension,manager)
             loginInstance = HandleLogin(browser,account) 
             while not stop_event.is_set() and not global_theard_event.is_set():
+                if account is None:
+                    break
                 if browser is None or not browser.service.is_connectable():
                     if browser:
                         browser.quit()
@@ -219,16 +230,20 @@ def push_list(account, managerDriver, dirextension,stop_event,system_account = N
                     logging.error(f'{account.get("name")} login thất bại, đợi 1p...')
                     loginInstance = HandleLogin(browser,account) 
                     while not stop_event.is_set() and not global_theard_event.is_set():
+                        if account is None:
+                            break
                         checkLogin = loginInstance.loginFacebook(sendNoti)
                         if checkLogin == False:
                             updateSystemMessage(system_account,'Login thất bại')
                             print('Đợi 1p rồi thử login lại!')
                             sleep(60)
                         else:
-                            send(f"Tài khoản {account.get('name')} bắt đầu cào newsfeed!")
+                            if account.get("name"):
+                                send(f"Tài khoản {account.get('name')} bắt đầu cào newsfeed!")
                             break
                     if sendNoti:
-                        send(f"Tài khoản {account.get('name')} không thể đăng nhập!")
+                        if account.get("name"):
+                            send(f"Tài khoản {account.get('name')} không thể đăng nhập!")
                         sendNoti = False
                     sleep(2)
                 
@@ -275,7 +290,8 @@ def push_list(account, managerDriver, dirextension,stop_event,system_account = N
                                         'status': 4,
                                         'cookie_id': account['latest_cookie']['id']
                                     })
-                                    send(f'{account.get("name")} không đăng được bài viết')
+                                    if account.get("name"):
+                                        send(f'{account.get("name")} không đăng được bài viết')
                                     logging.error(f"Bài viết {post_id} đăng lỗi quá 3 lần. Bỏ qua.")
                                     break
                                 logging.error(f"Lỗi đăng bài {post_id}. Thử lại sau 30s (lần thứ {retry_count[post_id]}).")

@@ -3,9 +3,12 @@ from pages.menu import setup_menu
 from main.root import get_root
 from helpers.log import config_log
 from helpers.system import init_system,close_system
+import threading
 
 if __name__ == "__main__":
-    init_system()
+
+    init_thread = threading.Thread(target=init_system)
+    init_thread.start()
 
     config_log()
 

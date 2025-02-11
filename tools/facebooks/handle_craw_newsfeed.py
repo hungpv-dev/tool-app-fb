@@ -48,6 +48,8 @@ def handleCrawlNewFeedVie(account, managerDriver ,dirextension = None, stop_even
     newfeed_instance.setProxy(account.get('proxy'))
     loginInstance = HandleLogin(browser,account,newsfeed_process_instance)
     while not stop_event.is_set() and not global_theard_event.is_set():
+        if account is None:
+            break
         try:
             if not init:
                 manager = Browser(f"/newsfeed/{str(account.get('id'))}/{str(uuid.uuid4())}",dirextension)
@@ -62,6 +64,8 @@ def handleCrawlNewFeedVie(account, managerDriver ,dirextension = None, stop_even
                 init = False
                 
             while not stop_event.is_set() and not global_theard_event.is_set():
+                if account is None:
+                    break
                 if browser is None or not browser.service.is_connectable():
                     manager = Browser(f"/newsfeed/home/{account['id']}", dirextension)
                     browser = manager.start()
@@ -79,7 +83,8 @@ def handleCrawlNewFeedVie(account, managerDriver ,dirextension = None, stop_even
                     print(f'{account.get("name")} login thất bại, đợi 1p...')
                     logging.error(f'{account.get("name")} login thất bại, đợi 1p...')
                     if sendNoti:
-                        send(f"Tài khoản {account.get('name')} không thể đăng nhập!")
+                        if account.get("name"):
+                            send(f"Tài khoản {account.get('name')} không thể đăng nhập!")
                         sendNoti = False
                     sleep(60)
                     try:
@@ -106,6 +111,8 @@ def handleCrawlNewFeedVie(account, managerDriver ,dirextension = None, stop_even
                 listId = set() 
                 # log_newsfeed(account,f"====================Thực thi cào fanpage {name}=====================")
                 while not stop_event.is_set() and not global_theard_event.is_set() and process['status_vie'] == 2: 
+                    if account is None:
+                        break
                     updateSystemMessage(system_account,'Bắt đầu cào vie')
                     try:
                         clickOk(browser)
@@ -113,16 +120,20 @@ def handleCrawlNewFeedVie(account, managerDriver ,dirextension = None, stop_even
                         loginInstance.updateStatusAcount(account.get('id'),3)
                     except NoSuchElementException as e:
                         while not stop_event.is_set() and not global_theard_event.is_set():
+                            if account is None:
+                                break
                             checkLogin = loginInstance.loginFacebook(sendNoti)
                             if checkLogin == False:
                                 updateSystemMessage(system_account,'Login thất bại')
                                 print('Đợi 1p rồi thử login lại!')
                                 sleep(60)
                             else:
-                                send(f"Tài khoản {account.get('name')} bắt đầu cào newsfeed!")
+                                if account.get("name"):
+                                    send(f"Tài khoản {account.get('name')} bắt đầu cào newsfeed!")
                                 break
                         if sendNoti:
-                            send(f"Tài khoản {account.get('name')} không thể đăng nhập!")
+                            if account.get("name"):
+                                send(f"Tài khoản {account.get('name')} không thể đăng nhập!")
                             sendNoti = False
                         sleep(2)
                     except Exception as e:
@@ -213,6 +224,8 @@ def handleCrawlNewFeed(account, name, dirextension = None,stop_event=None,system
         sendNotiKey = True
         # sendNoti = True
         while not stop_event.is_set() and not global_theard_event.is_set():
+            if account is None:
+                break
             try:
                 # while not stop_event.is_set() and not global_theard_event.is_set():
                     # try:
@@ -257,6 +270,8 @@ def handleCrawlNewFeed(account, name, dirextension = None,stop_event=None,system
                 sleep(3)
                 listId = set() 
                 while not stop_event.is_set() and not global_theard_event.is_set(): 
+                    if account is None:
+                        break
                     if browser is None or not browser.service.is_connectable():
                         print("Trình duyệt đã bị đóng. Khởi chạy lại...")
                         manager = Browser(f"/newsfeed/{str(account_id)}/{str(uuid.uuid4())}", dirextension)
@@ -356,7 +371,8 @@ def handleCrawlNewFeed(account, name, dirextension = None,stop_event=None,system
                                                 sendNotiKey = True
                                             else:
                                                 if sendNotiKey:
-                                                    send(f"{account.get('name')} không có từ khoá nào!")
+                                                    if account.get("name"):
+                                                        send(f"{account.get('name')} không có từ khoá nào!")
                                                     sendNotiKey = False
                                                 continue
                                                 
@@ -406,6 +422,8 @@ def crawlNewFeed(account,name,dirextension,stop_event=None,system_account=None):
         manager = None
         browser = None
         while not stop_event.is_set() and not global_theard_event.is_set():
+            if account is None:
+                break
             try:
                 manager = Browser(f"/newsfeed/{str(account_id)}/{str(uuid.uuid4())}",dirextension)
                 browser = manager.start()
@@ -440,6 +458,8 @@ def crawlNewFeed(account,name,dirextension,stop_event=None,system_account=None):
                 # log_newsfeed(account,f"==> Lưu bài viết <==")
 
                 while not stop_event.is_set() and not global_theard_event.is_set():
+                    if account is None:
+                        break
                     if browser is None or not browser.service.is_connectable():
                         print("Trình duyệt đã bị đóng. Khởi chạy lại...")
                         manager = Browser(f"/newsfeed/{str(account_id)}/{str(uuid.uuid4())}", dirextension)

@@ -184,3 +184,29 @@
 # test_api.base_url = 'https://httpbin.org'
 # test_api.setProxy(proxies)
 # print(test_api.get("/ip"))
+
+from collections import Counter
+
+def compare_texts(content, contentPost):
+    # Tách chuỗi thành từ để so sánh
+    content_words = content.split()
+    contentPost_words = contentPost.split()
+    
+    # Đếm tần suất của mỗi từ trong cả 2 chuỗi
+    content_counter = Counter(content_words)
+    contentPost_counter = Counter(contentPost_words)
+
+    # Tính toán Jaccard Similarity
+    intersection = sum((content_counter & contentPost_counter).values())  # Tổng tần suất từ chung
+    union = sum((content_counter | contentPost_counter).values())  # Tổng tần suất của tất cả từ
+
+    # Tính tỷ lệ phần trăm
+    percentage = (intersection / union) * 100
+    return percentage
+
+
+text1 = "Hiển ha ha"
+text2 = "Hùng Da ha"
+
+result = compare_texts(text1, text2)
+print(result)

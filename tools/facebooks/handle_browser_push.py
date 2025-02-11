@@ -50,6 +50,8 @@ class Push:
         loginInstance = HandleLogin(self.browser,self.account,post_process_instance)
         sendNoti = True
         while not stop_event.is_set() and not global_theard_event.is_set():
+            if self.account is None:
+                break
             try:
                 post_process_instance.update_process(self.account.get('id'),'Bắt đầu đăng nhập')
                 logging.error(f'==================Push ({self.account["name"]})================')
@@ -72,7 +74,8 @@ class Push:
                 print(f"Lỗi khi xử lý đăng bài viết!: {e}")
                 self.error_instance.insertContent(e)
                 if sendNoti:
-                    send(f"Tài khoản {self.account.get('name')} không thể đăng nhập!")
+                    if self.account.get("name"):
+                        send(f"Tài khoản {self.account.get('name')} không thể đăng nhập!")
                     sendNoti = False
                 if self.browser is None or not self.browser.service.is_connectable():
                     raise e
@@ -109,7 +112,8 @@ class Push:
                 print(e)
 
             
-            send(f'{self.account.get("name")} đăng bài trên: {", ".join(names)}')
+            if self.account.get("name"):
+                send(f'{self.account.get("name")} đăng bài trên: {", ".join(names)}')
                 
             managerDriver = {
                 'browser': self.browser,
@@ -219,6 +223,14 @@ class Push:
         sleep(3)
         return name
         
+    def clickXPATH(self, xpath):
+        try:
+            ok_button = self.browser.find_element(By.XPATH, xpath)
+            ok_button.click()
+            sleep(2)
+        except Exception as e:
+            pass
+
     def push(self,page,post,name):
         self.browser.get(page['link'])
         # sleep(2)
@@ -288,7 +300,8 @@ class Push:
             parent_form.submit()
             sleep(10)
             try:
-                pass
+                self.clickXPATH('//*[@aria-label="Not now"]')
+                self.clickXPATH('//*[@aria-label="Publish Original Post"]')
                 closeModal(1,self.browser,True)
             except:
                 pass
@@ -305,7 +318,24 @@ class Push:
         except KeyboardInterrupt:
             raise ValueError('Chương trình bị dừng!')
     
-    def afterUp(self,page, up,name):
+
+    def compare_texts(self, content, contentPost):
+        from collections import Counter
+        # Tách chuỗi thành từ để so sánh
+        content_words = content.split()
+        contentPost_words = contentPost.split()
+        # Đếm tần suất của mỗi từ trong cả 2 chuỗi
+        content_counter = Counter(content_words)
+        contentPost_counter = Counter(contentPost_words)
+        # Tính toán Jaccard Similarity
+        intersection = sum((content_counter & contentPost_counter).values())  # Tổng tần suất từ chung
+        union = sum((content_counter | contentPost_counter).values())  # Tổng tần suất của tất cả từ
+        # Tính tỷ lệ phần trăm
+        percentage = (intersection / union) * 100
+        return percentage
+
+    def afterUp(self,page, up, name):
+        from tools.facebooks.crawl_content_post import extract_facebook_content
         # self.browser.get(page['link'])
         # sleep(2)
         # self.browser.execute_script("document.body.style.zoom='0.4';")
@@ -318,6 +348,15 @@ class Push:
             modal = WebDriverWait(self.browser, 10).until(
                 EC.presence_of_element_located((By.XPATH, '//*[@aria-posinset="1"]'))
             )
+            content, content_link = extract_facebook_content(modal)
+            contentPost = up['content']
+
+            result = self.compare_texts(content, contentPost)
+            print(f'Tỷ lệ trung khớp: {result}')
+            # Kiểm tra nếu tỷ lệ trùng nhau < 80%
+            if result < 80:
+                raise ValueError('Bài viết đăng chưa thành công')
+
             actions = ActionChains(self.browser)
             # Chờ các liên kết bên trong modal
             links = WebDriverWait(self.browser, 10).until(
@@ -345,11 +384,16 @@ class Push:
             self.error_instance.insertContent(e)
             logging.error(f"Không tìm thấy bài viết vừa đăng! {e}")
             print(f"Không tìm thấy bài viết vừa đăng! {e}")
+            raise e
         
         logging.error('Đã lấy được link up')
         print('Đã lấy được link up')
         page_post_instance = PagePosts()
+        print(f'Link up: {link_up}')
+        if not link_up or link_up == '':
+            raise ValueError('Không thể lấy được url')
         link_up = clean_url_keep_params(link_up)
+        print(f'Link up format: {link_up}')
         save_like_up = clean_url_keep_params(link_up)
         page_post_instance.update_status(up['id'],{'link_up': save_like_up})
         sleep(2)

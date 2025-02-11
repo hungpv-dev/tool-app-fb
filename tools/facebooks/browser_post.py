@@ -28,6 +28,8 @@ def process_post(account,stop_event):
     logging.info(f'=========={account["name"]}============')
     print(f'=========={account["name"]}============')
     while not stop_event.is_set() and not global_theard_event.is_set():
+        if account is None:
+            break
         checkProxy = True
         dirextension = None
         proxy = account.get('proxy')
@@ -68,7 +70,8 @@ def process_post(account,stop_event):
             print(f"Trình duyệt bị đóng, thử lại sau 30s...")
             sleep(30)
 
-    send(f"Tài khoản {account.get('name')} đã bị dừng đăng bài!")
+    if account.get("name"):
+        send(f"Tài khoản {account.get('name')} đã bị dừng đăng bài!")
     system_instance.update_account(system_account.get('id'),{'status': 2})
             
     

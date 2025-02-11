@@ -33,6 +33,9 @@ def process_newsfeed(account, stop_event):
     newsfeed_process_instance.update_process(account.get('id'),'Bắt đầu')
 
     while not stop_event.is_set() and not global_theard_event.is_set():
+        if account is None:
+            break
+
         checkProxy = True
         extension = None
         proxy = account.get('proxy')
@@ -73,8 +76,8 @@ def process_newsfeed(account, stop_event):
             logging.error(f"Không thể khởi tạo trình duyệt, thử lại sau 30s...")
             print(f"Không thể khởi tạo trình duyệt, thử lại sau 30s...")
             sleep(30)
-        
-    send(f"Tài khoản {account.get('name')} đã bị dừng cào newsfeed!")
+    if account.get("name"):
+        send(f"Tài khoản {account.get('name')} đã bị dừng cào newsfeed!")
     system_instance.update_account(system_account.get('id'),{'status': 2})
 
     

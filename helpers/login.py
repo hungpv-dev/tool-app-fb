@@ -158,7 +158,8 @@ class HandleLogin:
             
             # send(f'{self.account.get("name")} bắt đầu xử lý captcha để đăng nhập')
             code = captcha_instance.getCode(src)
-            send(f'{self.account.get("name")} lấy từ captchat: {code}')
+            if self.account.get("name"):
+                send(f'{self.account.get("name")} lấy từ captchat: {code}')
             self.pushCode(code)
         except Exception as e:
             print('Lỗi khi xử lý captcha')
@@ -360,7 +361,8 @@ class HandleLogin:
             # print(f"Check block: {checkBlock}")
             if checkBlock:
                 if self.sendNoti:
-                    send(f"Tài khoản: {self.account.get('name')} đã bị khoá")
+                    if self.account.get("name"):
+                        send(f"Tài khoản: {self.account.get('name')} đã bị khoá")
                 self.updateMainModel('Tài khoản đã bị khoá!')
                 self.account_instance.update_account(self.account.get('id'),{'status_login': 5})
                 return check

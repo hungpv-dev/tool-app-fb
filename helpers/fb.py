@@ -91,11 +91,17 @@ def sanitize_text(text):
     # Lọc bỏ các ký tự nằm ngoài phạm vi BMP
     return re.sub(r'[^\u0000-\uFFFF]', '', text)
 
+import time
 def copy_and_paste_text(text,element):
     sanitized_text = sanitize_text(text)  # Loại bỏ ký tự đặc biệt
-    element.send_keys(sanitized_text)
+    # element.send_keys(sanitized_text)
     # pyperclip.copy(text)
     # element.send_keys(Keys.CONTROL, 'v')
+
+    # Gõ từng ký tự một
+    for char in sanitized_text:
+        element.send_keys(char)
+        time.sleep(0.1)
 
 def set_html_in_div(driver, element, html_content):
     driver.execute_script("arguments[0].innerHTML = arguments[1];", element, html_content)

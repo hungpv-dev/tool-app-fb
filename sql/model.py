@@ -13,7 +13,7 @@ class Model:
 
     def setProxy(self, proxy):
             try:
-                if proxies:
+                if proxy:
                     proxies = {
                         "http": f"http://{proxy.get('user')}:{proxy.get('pass')}@{proxy.get('ip')}:{proxy.get('port')}",
                         "https": f"http://{proxy.get('user')}:{proxy.get('pass')}@{proxy.get('ip')}:{proxy.get('port')}"
