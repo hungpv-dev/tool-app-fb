@@ -1,7 +1,7 @@
 import tkinter as tk
 from tkinter import ttk
-from tools.facebooks.get_link import process_crawl
-from main.fanpage import get_fanpage_process_instance
+from tools.facebooks.get_link import start_crawl_web
+from main.link import get_link_process_instance
 import threading
 from time import sleep
 import uuid
@@ -9,23 +9,25 @@ import logging
 from main.root import get_frame
 from tkinter import messagebox
 
-fanpage_process_instance = get_fanpage_process_instance()
 
-def submit_web_link_count(page_input_entry,total_process_label):
+link_process_instance = get_link_process_instance()
+
+def submit_page_count(page_input_entry,total_process_label):
     countPage = page_input_entry.get()
     try:
         countPage = int(countPage)
         if countPage < 1:
             messagebox.showwarning("Cảnh báo","Số lượng phải lớn hơn hoặc bằng 1.")
-        logging.info(f"Bắt đầu cào {countPage} Web.")
-        print(f"Bắt đầu cào {countPage} Web.")
+        logging.info(f"Bắt đầu cào {countPage} Fanpage.")
+        print(f"Bắt đầu cào {countPage} Fanpage.")
+
         def update_process_count():
-            total_process_label.config(text=f"Số tab đang mở: {len(fanpage_process_instance.get_all_processes())}")
+            total_process_label.config(text=f"Số tab đang mở: {len(link_process_instance.get_all_processes())}")
 
         for count in range(countPage):
             id = uuid.uuid4()
             stop_event = threading.Event()
-            thread = threading.Thread(target=process_crawl,args=(id,stop_event))
+            thread = threading.Thread(target=start_crawl_web,args=(id,stop_event))
             thread.start()
             data = {
                 'stop_event': stop_event,
@@ -33,7 +35,7 @@ def submit_web_link_count(page_input_entry,total_process_label):
                 'status_show': 'Sẵn sàng chạy...',
                 'status_process': 1,  # 1: Hoạt động, 2: Đã đóng
             }
-            fanpage_process_instance.add_process(id, data)
+            link_process_instance.add_process(id, data)
             update_process_count()
             sleep(1) 
 
@@ -48,7 +50,7 @@ def submit_web_link_count(page_input_entry,total_process_label):
 def link_page():
     frame = get_frame()
     """Hiển thị nội dung trang Home."""
-    label = tk.Label(frame, text="Cào bài viết từ đường dẫn", font=("Segoe UI", 20), bg="#f0f2f5")
+    label = tk.Label(frame, text="Cào website", font=("Segoe UI", 20), bg="#f0f2f5")
     label.pack(pady=20)
     
     from helpers.base import render
@@ -66,7 +68,7 @@ def link_page():
     button_frame = tk.Frame(frame, bg="#f0f2f5")
     button_frame.pack(pady=10)
 
-    submit_button = ttk.Button(button_frame,width=15, text="Xác nhận", style="Custom.TButton", command=lambda: submit_web_link_count(page_input_entry,total_process_label))
+    submit_button = ttk.Button(button_frame,width=15, text="Xác nhận", style="Custom.TButton", command=lambda: submit_page_count(page_input_entry,total_process_label))
     submit_button.pack(side=tk.LEFT,fill=tk.X, pady=5, expand=True)
 
     back_button = ttk.Button(button_frame,width=15, text="Quay lại", style="Custom.TButton", command=lambda: render('home'))
@@ -88,15 +90,15 @@ def link_page():
     progress_list.bind("<Configure>", update_scroll_region)
 
     # Hiển thị tất cả tiến trình cũ nếu có
-    all_processes = fanpage_process_instance.get_all_processes()
+    all_processes = link_process_instance.get_all_processes()
     
     # Cập nhật label với tổng số tiến trình
     total_process_label.config(text=f"Số tab đang mở: {len(all_processes)}")
 
-    fanpage_process_instance.setMainLayout(progress_list)
+    link_process_instance.setMainLayout(progress_list)
 
     for process_id,process in all_processes.items():
-        fanpage_process_instance.insert_view(process_id)
+       link_process_instance.insert_view(process_id)
 
     return frame
 

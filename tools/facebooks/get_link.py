@@ -1,9 +1,47 @@
+from helpers.global_value import get_global_theard_event
+from main.link import get_link_process_instance
+from time import sleep
 from tools.driver import Browser
 import logging
 from selenium.webdriver.common.by import By
 from time import sleep
 from sql.posts import Post
 from bs4 import BeautifulSoup
+from helpers.fb import clean_facebook_url_redirect
+link_process = get_link_process_instance()
+
+
+global_theard_event = get_global_theard_event()
+def start_crawl_web(tab_id, stop_event):
+    browser = Browser('/crawl')
+    browser.start(False)
+    link_process.update_process(tab_id,'Đang chuẩn bị cào dữ liệu....')
+    while not stop_event.is_set() and not global_theard_event.is_set():
+        link_process.update_process(tab_id,'Đang chuẩn bị cào dữ liệu....')
+        url = clean_facebook_url_redirect(url)
+        browser.get(url)  # Chuyển hướng
+        h1 = browser.find_element(By.CSS_SELECTOR, 'h1')
+        title = h1.text
+        html = browser.page_source
+
+        # Phân tích HTML và tìm thẻ <div> chứa nhiều thẻ <p> nhất
+        div_blocks = extract_div_with_p_tags(html)
+        main_div, num_p_tags = find_div_with_most_p_tags(div_blocks)
+        relevant_html = extract_relevant_tags(main_div)
+        response = Post().insert_post_web({'post': {
+            'content': relevant_html,
+            'link_facebook': url,
+            "title": title,
+            'images': []
+        }})
+        if response.get("status_code") == 200:
+            print("Bài viết đã được thêm vào database")
+        else:
+            print("Lỗi khi thêm bài viết vào database")
+        sleep(5)  # Đợi 10s
+    browser.quit()
+
+
 
 def extract_div_with_p_tags(html):
     soup = BeautifulSoup(html, 'html.parser')
@@ -36,37 +74,37 @@ def extract_relevant_tags(main_div):
         return main_div.decode_contents()
     return ""
 
-from helpers.fb import clean_facebook_url_redirect
 
-def process_crawl(urls):
-    try:
-        manager = Browser('/crawl', loadContent=True)
-        browser = manager.start(False)  # Khởi tạo trình duyệt
-        for url in urls:
-            url = clean_facebook_url_redirect(url)
-            browser.get(url)  # Chuyển hướng
-            h1 = browser.find_element(By.CSS_SELECTOR, 'h1')
-            title = h1.text
-            html = browser.page_source
 
-            # Phân tích HTML và tìm thẻ <div> chứa nhiều thẻ <p> nhất
-            div_blocks = extract_div_with_p_tags(html)
-            main_div, num_p_tags = find_div_with_most_p_tags(div_blocks)
-            relevant_html = extract_relevant_tags(main_div)
-            response = Post().insert_post_web({'post': {
-                'content': relevant_html,
-                'link_facebook': url,
-                "title": title,
-                'images': []
-            }})
-            if response.get("status_code") == 200:
-                print("Bài viết đã được thêm vào database")
-            else:
-                print("Lỗi khi thêm bài viết vào database")
-            sleep(5)  # Đợi 10s
-    except Exception as e:
-        logging.error(f"Lỗi: {e}")
-        print(f"Lỗi: {e}")
-    finally:
-        if browser:
-            browser.quit()
+# def process_crawl(urls):
+#     try:
+#         manager = Browser('/crawl', loadContent=True)
+#         browser = manager.start(False)  # Khởi tạo trình duyệt
+#         for url in urls:
+#             url = clean_facebook_url_redirect(url)
+#             browser.get(url)  # Chuyển hướng
+#             h1 = browser.find_element(By.CSS_SELECTOR, 'h1')
+#             title = h1.text
+#             html = browser.page_source
+
+#             # Phân tích HTML và tìm thẻ <div> chứa nhiều thẻ <p> nhất
+#             div_blocks = extract_div_with_p_tags(html)
+#             main_div, num_p_tags = find_div_with_most_p_tags(div_blocks)
+#             relevant_html = extract_relevant_tags(main_div)
+#             response = Post().insert_post_web({'post': {
+#                 'content': relevant_html,
+#                 'link_facebook': url,
+#                 "title": title,
+#                 'images': []
+#             }})
+#             if response.get("status_code") == 200:
+#                 print("Bài viết đã được thêm vào database")
+#             else:
+#                 print("Lỗi khi thêm bài viết vào database")
+#             sleep(5)  # Đợi 10s
+#     except Exception as e:
+#         logging.error(f"Lỗi: {e}")
+#         print(f"Lỗi: {e}")
+#     finally:
+#         if browser:
+#             browser.quit()
