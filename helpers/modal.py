@@ -18,8 +18,7 @@ def closeModal(index, browser,last = False):
             logging.error(f"Không tìm thấy phần tử hợp lệ tại index: {index}")
             print(f"Không tìm thấy phần tử hợp lệ tại index: {index}")
     except Exception as e:
-        logging.error(f"Lỗi: {str(e)}")
-        print(f"Lỗi: {str(e)}")
+        pass
 
 def openProfile(browser,name_fanpage = ''):
     from tools.types import push

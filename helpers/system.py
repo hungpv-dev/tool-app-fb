@@ -49,7 +49,8 @@ def init_system():
 def close_system():
     global_theard_event.set()
     system = get_system()
-    system_instance.update(system.get('id'),{'status': 2})
+    system_instance.destroy(system.get('id'))
+    # system_instance.update(system.get('id'),{'status': 2})
     send(f"Đóng tool trên máy: {system.get('info').get('Tên máy')}")
 
 def get_system():

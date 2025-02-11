@@ -32,6 +32,29 @@ def download_update(text_widget):
         url = f'https://drive.google.com/uc?id={file_id}'
 
     try:
+        # Kiểm tra xem Python có tồn tại không
+        if shutil.which("python") is None and shutil.which("python3") is None:
+            print("Lỗi: Hệ thống không có Python. Vui lòng cài đặt Python trước khi tiếp tục!")
+            raise ValueError('Không tìm thấy Python')
+
+        # Lấy phiên bản Python khả dụng
+        python_cmd = shutil.which("python") or shutil.which("python3")
+        # Kiểm tra pip
+        if shutil.which("pip") is None:
+            print("pip chưa được cài đặt, tiến hành cài đặt pip...")
+            try:
+                subprocess.run([python_cmd, "-m", "ensurepip", "--default-pip"], check=True)
+                print("Cài đặt pip thành công.")
+            except subprocess.CalledProcessError:
+                print("Lỗi: Không thể cài đặt pip. Hãy cài đặt thủ công!")
+                raise ValueError('Không thể tải PIP')
+
+        # Kiểm tra gdown
+        if shutil.which("gdown") is None:
+            print("gdown chưa được cài đặt, tiến hành cài đặt...")
+            subprocess.run(["pip", "install", "gdown"], check=True)
+            print("Cài đặt gdown hoàn tất.")
+
         # Chạy gdown bằng subprocess để lấy tiến trình tải
         process = subprocess.Popen(
             ["gdown", url, "-O", new_file, "--fuzzy"],
@@ -46,8 +69,7 @@ def download_update(text_widget):
         process.wait()
 
     except Exception as e:
-        messagebox.showerror("Lỗi", f"Không thể tải file cập nhật: {e}")
-        return None
+        raise ValueError(f'Lỗi: {e}')
     
     return new_file
 
@@ -80,6 +102,7 @@ def replace_and_restart(new_file):
     messagebox.showinfo("Cập nhật", "Cập nhật hoàn tất. Ứng dụng sẽ khởi động lại.")
 
     # Khởi động lại ứng dụng mới
+    print(f"Old file: {old_file}")
     subprocess.Popen([old_file])
     os._exit(0)
 
@@ -93,15 +116,19 @@ def replace_file_in_thread(new_file):
 def start_update(text_widget):
     """Chạy quá trình tải cập nhật trong một luồng riêng."""
     
-    messagebox.showinfo("Cập nhật", "Đang tải bản cập nhật. Vui lòng đợi...")
+    messagebox.showinfo("Cập nhật", "Vui lòng click ok và đợi 3p...")
 
     def run_download():
-        new_file = download_update(text_widget)
-        if new_file is None:
-            messagebox.showinfo("Cập nhật", "Hiện không có bản cập nhật nào")
-        if new_file:
-            messagebox.showinfo("Cập nhật", "Cập nhật hoàn tất. Ứng dụng sẽ khởi động lại.")
-            replace_file_in_thread(new_file)
+        try:
+            new_file = download_update(text_widget)
+            if new_file is None:
+                messagebox.showinfo("Cập nhật", "Hiện không có bản cập nhật nào")
+            if new_file:
+                messagebox.showinfo("Cập nhật", "Cập nhật hoàn tất. Ứng dụng sẽ khởi động lại.")
+                replace_file_in_thread(new_file)
+        except Exception as e:
+            messagebox.showinfo("Thất bại", "Đã xảy ra lỗi, vui lòng thử lại sau")
+
 
     threading.Thread(target=run_download, daemon=True).start()
 

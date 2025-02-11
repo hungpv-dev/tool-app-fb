@@ -303,7 +303,7 @@ class Push:
                 self.clickXPATH('//*[@aria-label="Not now"]')
                 self.clickXPATH('//*[@aria-label="Publish Original Post"]')
                 closeModal(1,self.browser,True)
-            except:
+            except Exception as e:
                 pass
             sleep(10)
             for file in listLinkTemps:
@@ -384,7 +384,6 @@ class Push:
             self.error_instance.insertContent(e)
             logging.error(f"Không tìm thấy bài viết vừa đăng! {e}")
             print(f"Không tìm thấy bài viết vừa đăng! {e}")
-            raise e
         
         logging.error('Đã lấy được link up')
         print('Đã lấy được link up')
