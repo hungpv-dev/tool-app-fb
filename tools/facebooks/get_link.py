@@ -20,15 +20,24 @@ def start_crawl_web(tab_id, stop_event):
         while not stop_event.is_set() and not global_theard_event.is_set():
             try:
                 # Extract the link from the provided API object
-                url = post.get_url_by_post().get('link')
+                data = post.get_url_by_post()
+                url = data.get('link')
                 if not url:
                     print("Không tìm thấy URL trong object API")
-                    continue
+                    link_process.stop_process(tab_id)
+                    break
                 url = clean_facebook_url_redirect(url)
-                browser.get(url) 
+                browser.get(url)
                 link_process.update_process(tab_id, f'Đang cào dữ liệu {url}')
-                h1_element = browser.find_element(By.XPATH, '//h1[not(.//a)]')
-                title = h1_element.text
+                try:
+                    h1_element = browser.find_element(By.XPATH, '//h1[not(.//a)]')
+                    title = h1_element.text
+                except Exception as e:
+                    logging.error(f"Lỗi khi tìm thẻ <h1> từ {url}: {e}")
+                    link_process.update_process(tab_id, f'Lỗi khi cào dữ liệu {url}')
+                    post.put_url_by_post(data.get('id'))
+                    print(f"Lỗi khi tìm thẻ <h1> từ {url}: {e}")
+                    continue  # Bỏ qua và tiếp tục với URL tiếp theo
                 html = browser.page_source
                 # Phân tích HTML và tìm thẻ <div> chứa nhiều thẻ <p> nhất
                 div_blocks = extract_div_with_p_tags(html)
@@ -43,6 +52,7 @@ def start_crawl_web(tab_id, stop_event):
                 if response.get("status_code") == 200:
                     link_process.update_process(tab_id, f'Cào dữ liệu thành công {url}')
                 else:
+                    post.put_url_by_post(data.get('id'))
                     link_process.update_process(tab_id, f'Cào dữ liệu thất bại {url}')
                 sleep(5)  # Đợi 5s trước khi tiếp tục
             except Exception as e:
@@ -82,15 +92,19 @@ def find_div_with_most_p_tags(div_blocks):
     return main_div, num_p_tags
 
 def extract_relevant_tags(main_div):
-    if main_div:
+    if (main_div):
         # Loại bỏ các thẻ <script> bên trong các thẻ <div> con
         for div in main_div.find_all('div'):
             for script in div.find_all('script'):
                 script.decompose()
         
         # Loại bỏ các thẻ <script> và <style> còn lại trong main_div
-        for tag in main_div.find_all(['script', 'style']):
+        for tag in main_div.find_all(['script', 'style', 'a', 'ins', 'iframe','canvas']):
             tag.decompose()
+        ad_classes = ['ad', 'advertisement', 'ads', 'adv', 'Ad-Container', 'Ad-Container AdvInTextBuilder_slot-wrapper___Oz3G']
+        for ad_class in ad_classes:
+            for ad_tag in main_div.find_all(class_=ad_class):
+                ad_tag.decompose()
 
         return main_div.decode_contents()
     return ""
