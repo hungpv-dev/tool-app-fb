@@ -3,6 +3,7 @@ from main.link import get_link_process_instance
 from time import sleep
 from tools.driver import Browser
 import logging
+import requests
 from selenium.webdriver.common.by import By
 from sql.posts import Post
 from bs4 import BeautifulSoup
@@ -27,6 +28,12 @@ def start_crawl_web(tab_id, stop_event):
                     link_process.stop_process(tab_id)
                     break
                 url = clean_facebook_url_redirect(url)
+                response = requests.head(url)
+                if response.status_code >= 400:
+                    logging.error(f"Lỗi HTTP {response.status_code} khi truy cập {url}")
+                    link_process.update_process(tab_id, f'Lỗi HTTP {response.status_code} khi truy cập {url}')
+                    post.put_url_by_post(data.get('id'))
+                    continue  # Bỏ qua và tiếp tục với URL tiếp theo
                 browser.get(url)
                 link_process.update_process(tab_id, f'Đang cào dữ liệu {url}')
                 try:
@@ -36,13 +43,13 @@ def start_crawl_web(tab_id, stop_event):
                     logging.error(f"Lỗi khi tìm thẻ <h1> từ {url}: {e}")
                     link_process.update_process(tab_id, f'Lỗi khi cào dữ liệu {url}')
                     post.put_url_by_post(data.get('id'))
-                    print(f"Lỗi khi tìm thẻ <h1> từ {url}: {e}")
                     continue  # Bỏ qua và tiếp tục với URL tiếp theo
                 html = browser.page_source
                 # Phân tích HTML và tìm thẻ <div> chứa nhiều thẻ <p> nhất
                 div_blocks = extract_div_with_p_tags(html)
                 main_div, num_p_tags = find_div_with_most_p_tags(div_blocks)
                 relevant_html = extract_relevant_tags(main_div)
+                print(relevant_html)
                 response = Post().insert_post_web({'post': {
                     'content': relevant_html,
                     'link_facebook': url,
@@ -54,7 +61,7 @@ def start_crawl_web(tab_id, stop_event):
                 else:
                     post.put_url_by_post(data.get('id'))
                     link_process.update_process(tab_id, f'Cào dữ liệu thất bại {url}')
-                sleep(5)  # Đợi 5s trước khi tiếp tục
+                sleep(3)  # Đợi 5s trước khi tiếp tục
             except Exception as e:
                 logging.error(f"Lỗi khi cào dữ liệu từ {url}: {e}")
                 print(f"Lỗi khi cào dữ liệu từ {url}: {e}")
@@ -92,19 +99,22 @@ def find_div_with_most_p_tags(div_blocks):
     return main_div, num_p_tags
 
 def extract_relevant_tags(main_div):
-    if (main_div):
-        # Loại bỏ các thẻ <script> bên trong các thẻ <div> con
+    if main_div:
         for div in main_div.find_all('div'):
-            for script in div.find_all('script'):
+            for script in div.find_all(['script', 'button']):
                 script.decompose()
-        
-        # Loại bỏ các thẻ <script> và <style> còn lại trong main_div
-        for tag in main_div.find_all(['script', 'style', 'a', 'ins', 'iframe','canvas']):
+        for video_tag in main_div.find_all(['video', 'iframe']):
+            parent_div = video_tag.find_parent('div')
+            if parent_div:
+                parent_div.decompose()
+        for tag in main_div.find_all(['script', 'style', 'a', 'ins', 'iframe', 'canvas']):
             tag.decompose()
-        ad_classes = ['ad', 'advertisement', 'ads', 'adv', 'Ad-Container', 'Ad-Container AdvInTextBuilder_slot-wrapper___Oz3G']
+        ad_classes = ['ad', 'advertisement', 'ads', 'adv', 'Ad-Container', 'Ad-Container AdvInTextBuilder_slot-wrapper___Oz3G', 'code-block']
         for ad_class in ad_classes:
             for ad_tag in main_div.find_all(class_=ad_class):
                 ad_tag.decompose()
-
+        for div in main_div.find_all('div'):
+            if not div.get_text(strip=True) and not div.find_all():
+                div.decompose()
         return main_div.decode_contents()
     return ""

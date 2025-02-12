@@ -50,7 +50,7 @@ def submit_page_count(page_input_entry,total_process_label):
 def link_page():
     frame = get_frame()
     """Hiển thị nội dung trang Home."""
-    label = tk.Label(frame, text="Cào website", font=("Segoe UI", 20), bg="#f0f2f5")
+    label = tk.Label(frame, text="Lấy bài viết từ website", font=("Segoe UI", 20), bg="#f0f2f5")
     label.pack(pady=20)
     
     from helpers.base import render
@@ -98,7 +98,7 @@ def link_page():
     link_process_instance.setMainLayout(progress_list)
 
     for process_id,process in all_processes.items():
-       link_process_instance.insert_view(process_id)
+        link_process_instance.insert_view(process_id)
 
     return frame
 
