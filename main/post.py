@@ -12,8 +12,13 @@ class PostProcess:
             if id in self.progress_data:
                 process = self.progress_data[id]
                 process["status"] = new_text
-                status_label = process.get("status_label") 
-                fullText = f"{process.get('status')}: {process.get('status_page','')}, {process.get('status_list','')}"
+                status_label = process.get("status_label")
+                status_parts = [process.get('status')]
+                if process.get('status_page'):
+                    status_parts.append(process.get('status_page'))
+                if process.get('status_list'):
+                    status_parts.append(process.get('status_list'))
+                fullText = ": \n".join(status_parts)
                 if status_label:
                     status_label.config(text=fullText) 
         except Exception as e:
@@ -26,9 +31,14 @@ class PostProcess:
                 process = self.progress_data[id]
                 process[type] = text
                 status_label = process.get("status_label") 
-                fullText = f"{process.get('status')}: {process.get('status_page')}, {process.get('status_list')}"
+                status_parts = [process.get('status')]
+                if process.get('status_page'):
+                    status_parts.append(process.get('status_page'))
+                if process.get('status_list'):
+                    status_parts.append(process.get('status_list'))
+                fullText = ": \n".join(status_parts)
                 if status_label:
-                    status_label.config(text=fullText) 
+                    status_label.config(text=fullText)  
         except Exception as e:
             print(f"Đã xảy ra lỗi khi cập nhật task_label: {e}")
             # logging.error(f"Đã xảy ra lỗi khi cập nhật task_label: {e}")

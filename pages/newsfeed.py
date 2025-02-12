@@ -153,7 +153,7 @@ def newsfeed_page_list():
         header.pack(fill="x", pady=5)
         ttk.Label(header, text="Tài khoản", font=("Segoe UI", 12, 'bold'), width=25).pack(side="left", padx=5)
         ttk.Label(header, text="Tổng số tiến trình", font=("Segoe UI", 12, 'bold'), width=25).pack(side="left", padx=5)
-        ttk.Label(header, text="Trạng thái", font=("Segoe UI", 12, 'bold'), width=60).pack(side="left", padx=5)
+        ttk.Label(header, text="Trạng thái", font=("Segoe UI", 12, 'bold'), width=25).pack(side="left", padx=5)
         ttk.Label(header, text="Hành động", font=("Segoe UI", 12, 'bold'), width=15).pack(side="right", padx=5)
 
 
@@ -167,7 +167,7 @@ def newsfeed_page_list():
             task_label.pack(side="left", padx=5)
             account['task_label'] = task_label
 
-            status_label = ttk.Label(row, text=account.get("status"), font=("Segoe UI", 12), width=60)
+            status_label = ttk.Label(row, text=account.get("status"), font=("Segoe UI", 12), width=25)
             status_label.pack(side="left", padx=5)
             account['status_label'] = status_label
 

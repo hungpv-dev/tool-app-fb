@@ -333,11 +333,11 @@ class CrawlContentPost:
         }
 
         # Chuyển đổi thành JSON với indent=4
-        print(json.dumps({
-            'like': data.get('like'),
-            'comment': data.get('comment'),
-            'share': data.get('share'),
-        }, indent=4))
+        # print(json.dumps({
+        #     'like': data.get('like'),
+        #     'comment': data.get('comment'),
+        #     'share': data.get('share'),
+        # }, indent=4))
         self.insertPostAndComment(data,dataComment, his)
         
     def likePost(self):
