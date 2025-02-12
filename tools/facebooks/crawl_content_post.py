@@ -532,11 +532,15 @@ def extract_facebook_content(modal):
     from helpers.fb import clean_facebook_url_redirect, remove_params
     try:
         try:
-            see_more_button = modal.find_element(By.XPATH, ".//button[contains(text(), 'Not now')]")
-            see_more_button.click()
-            sleep(3)
-        except:
-            pass
+            seeMores = modal.find_elements(By.XPATH, ".//*[contains(text(), 'See more')]")
+            for see in seeMores:
+                try:
+                    see.click()
+                    sleep(3)
+                except Exception as e:
+                    continue
+        except Exception as e:
+            print(f'Click see more không thành công: {e}')
         
         content_link = []
         content = modal.find_element(By.XPATH, types['content'])
