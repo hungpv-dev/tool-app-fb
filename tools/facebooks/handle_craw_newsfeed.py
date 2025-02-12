@@ -54,7 +54,7 @@ def handleCrawlNewFeedVie(account, managerDriver ,dirextension = None, stop_even
             if not init:
                 manager = Browser(f"/newsfeed/{str(account.get('id'))}/{str(uuid.uuid4())}",dirextension)
                 browser = manager.start()
-                loginInstance = HandleLogin(browser,account)
+                loginInstance = HandleLogin(browser,account,newsfeed_process_instance)
                 loginInstance.setAccount()
                 try:
                     loginInstance.login()
@@ -70,7 +70,7 @@ def handleCrawlNewFeedVie(account, managerDriver ,dirextension = None, stop_even
                     manager = Browser(f"/newsfeed/home/{account['id']}", dirextension)
                     browser = manager.start()
                     try:
-                        loginInstance = HandleLogin(browser,account)
+                        loginInstance = HandleLogin(browser,account,newsfeed_process_instance)
                         loginInstance.login()
                     except Exception as e:
                         print('Looxi: {e}')
@@ -80,6 +80,7 @@ def handleCrawlNewFeedVie(account, managerDriver ,dirextension = None, stop_even
                     profile_button = browser.find_element(By.XPATH, push['openProfile'])
                     loginInstance.updateStatusAcount(account.get('id'),3)
                 except NoSuchElementException as e:
+                    newsfeed_process_instance.update_process(account.get('id'),'Chờ 1p để login lại')
                     print(f'{account.get("name")} login thất bại, đợi 1p...')
                     logging.error(f'{account.get("name")} login thất bại, đợi 1p...')
                     if sendNoti:

@@ -20,6 +20,8 @@ def newfeedhandle(selected_accounts):
             thread.start()
             account['stop_event'] = stop_event
             account['tasks'] = [thread]
+            account['status_page'] = ''
+            account['status_list'] = ''
             account['status_process'] = 1 # 1: Hoạt động, 2: Đã đóng
             post_process_instance.add_process(account)
     except Exception as e:
@@ -163,7 +165,7 @@ def post_page_list():
         header.pack(fill="x", pady=5)
         ttk.Label(header, text="Tài khoản", font=("Segoe UI", 12, 'bold'), width=25).pack(side="left", padx=5)
         ttk.Label(header, text="Tổng số tiến trình", font=("Segoe UI", 12, 'bold'), width=25).pack(side="left", padx=5)
-        ttk.Label(header, text="Trạng thái", font=("Segoe UI", 12, 'bold'), width=25).pack(side="left", padx=5)
+        ttk.Label(header, text="Trạng thái", font=("Segoe UI", 12, 'bold'), width=60).pack(side="left", padx=5)
         ttk.Label(header, text="Hành động", font=("Segoe UI", 12, 'bold'), width=15).pack(side="right", padx=5)
 
         # Hiển thị các tiến trình
@@ -174,12 +176,14 @@ def post_page_list():
             account_label = ttk.Label(row, text=account["name"], font=("Segoe UI", 12), width=25).pack(side="left", padx=5)
             task_label = ttk.Label(row, text=len(account.get('tasks')), font=("Segoe UI", 12), width=25)
             task_label.pack(side="left", padx=5)
-            status_label = ttk.Label(row, text=account.get("status"), font=("Segoe UI", 12), width=25)
+            status_label = ttk.Label(row, text=account.get("status"), font=("Segoe UI", 12), width=60)
             status_label.pack(side="left", padx=5)
 
             account['status_label'] = status_label
             account['task_label'] = task_label
             account['row'] = row
+            account['status_page'] = ''
+            account['status_list'] = ''
             
             if account.get('status_process') == 1:
                 close_button = ttk.Button(row, text="Đóng", style="Custom.TButton", command=lambda account=account: close_process(account,))

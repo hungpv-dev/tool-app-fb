@@ -107,7 +107,8 @@ def push_page(page,account,dirextension,stop_event,system_account = None):
                         retry_count[pot_id] = 0
                     while retry_count[pot_id] < 3:
                         try:
-                            post_process_instance.update_process(account.get('id'),f"Xử lý đăng bài: {pageUP['id']}")
+                            post_process_instance.update_time(account.get('id'),'status_page',f"Giỏ: đăng {pageUP['id']}")
+                            # post_process_instance.update_process(account.get('id'),f"Xử lý đăng bài: {pageUP['id']}")
                             res = account_instance.updateCount(cookie.get('id'),'counts')
                             print(f'{page.get("name")} chuyển hướng')
                             name = push_instance.switchPage(page,stop_event)
@@ -121,11 +122,17 @@ def push_page(page,account,dirextension,stop_event,system_account = None):
                             awaitSleep = int(pageUP.get('await', 0)) * 60
                             logging.error(f'=====>{name}: cần đợi {pageUP.get("await", 0)}p để đăng bài tiếp theo!')
                             print(f'=====>{name}: cần đợi {pageUP.get("await", 0)}p để đăng bài tiếp theo!')
-                            post_process_instance.update_process(account.get('id'),f"Đăng thành công bài {pageUP['id']}")
+                            post_process_instance.update_time(account.get('id'),'status_page',f"Giỏ: thành công {pageUP['id']}")
+                            # post_process_instance.update_process(account.get('id'),f"Đăng thành công bài {pageUP['id']}")
                             retry_count.pop(pot_id, None)
-                            sleep(awaitSleep)
+                            for i in range(awaitSleep):
+                                vl = awaitSleep - i
+                                post_process_instance.update_time(account.get('id'),'status_page',f"Giỏ: đợi {vl}s")
+                                sleep(1)
                             break
                         except NoSuchElementException as e:
+                            post_process_instance.update_time(account.get('id'),"status_page","")
+                            post_process_instance.update_time(account.get('id'),"status_list","")
                             page_post_instance.update_status(pageUP['id'], {'status': 1})
                             break
                         except Exception as e:
@@ -144,6 +151,7 @@ def push_page(page,account,dirextension,stop_event,system_account = None):
                                 break
                             sleep(5)
                 else: 
+                    post_process_instance.update_time(account.get('id'),'status_page',f"Giỏ: Không có bài")
                     logging.error(f'{page.get("name")} không có bài nào, chờ 1p...')
                     print(f'{page.get("name")} không có bài nào, chờ 1p...')
                     sleep(60)
@@ -160,6 +168,8 @@ def push_page(page,account,dirextension,stop_event,system_account = None):
                 manager.cleanup()
             browser = None
             manager = None
+            post_process_instance.update_time(account.get('id'),"status_page","")
+            post_process_instance.update_time(account.get('id'),"status_list","")
     print('Dừng xử lý đăng bài page')
     
 
@@ -189,7 +199,7 @@ def push_list(account, managerDriver, dirextension,stop_event,system_account = N
                 manager.cleanup()
             manager = Browser(f"/push/{account['id']}/{str(uuid.uuid4())}",dirextension,loadContent=True)
             browser = manager.start()
-            loginInstance = HandleLogin(browser,account)
+            loginInstance = HandleLogin(browser,account,main_model=post_process_instance)
             loginInstance.setAccount()
             try:
                 loginInstance.login()
@@ -201,7 +211,7 @@ def push_list(account, managerDriver, dirextension,stop_event,system_account = N
         try:
             sleep(3)
             push = Push(browser,account,dirextension,manager)
-            loginInstance = HandleLogin(browser,account) 
+            loginInstance = HandleLogin(browser,account,main_model=post_process_instance) 
             while not stop_event.is_set() and not global_theard_event.is_set():
                 if account is None:
                     break
@@ -239,7 +249,7 @@ def push_list(account, managerDriver, dirextension,stop_event,system_account = N
                             sleep(60)
                         else:
                             if account.get("name"):
-                                send(f"Tài khoản {account.get('name')} bắt đầu cào newsfeed!")
+                                send(f"Tài khoản {account.get('name')} bắt đầu đăng bài!")
                             break
                     if sendNoti:
                         if account.get("name"):
@@ -262,7 +272,8 @@ def push_list(account, managerDriver, dirextension,stop_event,system_account = N
 
                         while retry_count[post_id] < 3:
                             try:
-                                post_process_instance.update_process(account.get('id'),f"Xử lý đăng bài: {post['id']}")
+                                post_process_instance.update_time(account.get('id'),'status_list',f"Hẹn, Ngay: đăng {post['id']}")
+                                # post_process_instance.update_process(account.get('id'),f"Xử lý đăng bài: {post['id']}")
                                 page = post.get('page')
                                 name = push.switchPage(page,stop_event)
                                 updateSystemMessage(system_account,f'Bắt đầu đăng page: {name}')
@@ -272,13 +283,19 @@ def push_list(account, managerDriver, dirextension,stop_event,system_account = N
                                     'status': 2,
                                     'cookie_id': account['latest_cookie']['id']
                                 })
-                                post_process_instance.update_process(account.get('id'),f"Đăng thành công bài: {post['id']}")
+                                post_process_instance.update_time(account.get('id'),'status_list',f"Hẹn, Ngay: thành công {post['id']}")
+                                # post_process_instance.update_process(account.get('id'),f"Đăng thành công bài: {post['id']}")
                                 sleep(2)
                                 retry_count.pop(post_id, None)
-                                sleep(300)
+                                for i in range(240):
+                                    vl = 240 - i
+                                    post_process_instance.update_time(account.get('id'),'status_list',f"Hẹn, Ngay: chờ {vl}s")
+                                    sleep(1)
                                 break
                             except NoSuchElementException as e:
                                 page_post_instance.update_status(post['id'], {'status': 1})
+                                post_process_instance.update_time(account.get('id'),"status_page","")
+                                post_process_instance.update_time(account.get('id'),"status_list","")
                                 break
                             except Exception as e:
                                 retry_count[post_id] += 1
@@ -299,6 +316,7 @@ def push_list(account, managerDriver, dirextension,stop_event,system_account = N
                 else:
                     logging.error('Không có bài nào cần đăng trong thời gian này, đợi 30s...')
                     print('Không có bài nào cần đăng trong thời gian này, đợi 30s...')
+                    post_process_instance.update_time(account.get('id'),'status_list',f"Hẹn, Ngay: không có bài")
                     sleep(30)
         except Exception as e:
             error_instance.insertContent(e)
@@ -310,6 +328,8 @@ def push_list(account, managerDriver, dirextension,stop_event,system_account = N
                 manager.cleanup()
             browser = None
             manager = None
+            post_process_instance.update_time(account.get('id'),"status_page","")
+            post_process_instance.update_time(account.get('id'),"status_list","")
             logging.error('Lỗi khi đăng bài time,thử lại sau 30s')
             print('Lỗi khi đăng bài time,thử lại sau 30s')
             sleep(30)

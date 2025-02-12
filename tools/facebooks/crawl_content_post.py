@@ -12,7 +12,7 @@ from selenium.common.exceptions import NoSuchElementException,ElementClickInterc
 import random
 from sql.posts import Post
 from helpers.modal import closeModal
-from helpers.fb import clean_url_keep_params,clean_facebook_url_redirect
+from helpers.fb import clean_url_keep_params,clean_facebook_url_redirect,convert_shorthand_to_number
 from sql.pages import Page
 from sql.errors import Error
 from sql.history import HistoryCrawlPage
@@ -182,6 +182,19 @@ class CrawlContentPost:
         except Exception as e:
             logging.error(f"Không lấy được like, comment, share")
             print(f"Không lấy được like, comment, share")
+
+        try:
+            data['like'] = convert_shorthand_to_number(data['like'])
+        except Exception as e:
+            data['like'] = 0
+        try:
+            data['comment'] = convert_shorthand_to_number(data['comment']) or 0
+        except Exception as e:
+            data['comment'] = 0
+        try:
+            data['share'] = convert_shorthand_to_number(data['share']) or 0
+        except Exception as e:
+            data['share'] = 0
         # Lấy comment
         try:
             scroll = modal.find_element(By.XPATH,types['scroll'])
@@ -320,7 +333,11 @@ class CrawlContentPost:
         }
 
         # Chuyển đổi thành JSON với indent=4
-        print(json.dumps(merged_data, indent=4))
+        print(json.dumps({
+            'like': data.get('like'),
+            'comment': data.get('comment'),
+            'share': data.get('share'),
+        }, indent=4))
         self.insertPostAndComment(data,dataComment, his)
         
     def likePost(self):

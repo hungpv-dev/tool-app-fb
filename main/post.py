@@ -13,11 +13,26 @@ class PostProcess:
                 process = self.progress_data[id]
                 process["status"] = new_text
                 status_label = process.get("status_label") 
+                fullText = f"{process.get('status')}: {process.get('status_page','')}, {process.get('status_list','')}"
                 if status_label:
-                    status_label.config(text=new_text) 
+                    status_label.config(text=fullText) 
         except Exception as e:
             print(f"Đã xảy ra lỗi khi cập nhật task_label: {e}")
             # logging.error(f"Đã xảy ra lỗi khi cập nhật task_label: {e}")
+
+    def update_time(self, id, type, text):
+        try:
+            if id in self.progress_data:
+                process = self.progress_data[id]
+                process[type] = text
+                status_label = process.get("status_label") 
+                fullText = f"{process.get('status')}: {process.get('status_page')}, {process.get('status_list')}"
+                if status_label:
+                    status_label.config(text=fullText) 
+        except Exception as e:
+            print(f"Đã xảy ra lỗi khi cập nhật task_label: {e}")
+            # logging.error(f"Đã xảy ra lỗi khi cập nhật task_label: {e}")
+
         
     def update_task(self, id, newtask):
         try:

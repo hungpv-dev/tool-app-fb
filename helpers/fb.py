@@ -94,15 +94,39 @@ def sanitize_text(text):
 import time
 def copy_and_paste_text(text,element):
     sanitized_text = sanitize_text(text)  # Loại bỏ ký tự đặc biệt
-    # element.send_keys(sanitized_text)
+    element.send_keys(sanitized_text)
     # pyperclip.copy(text)
     # element.send_keys(Keys.CONTROL, 'v')
 
     # Gõ từng ký tự một
-    for char in sanitized_text:
-        element.send_keys(char)
-        time.sleep(0.1)
+    # for char in sanitized_text:
+    #     element.send_keys(char)
+    #     time.sleep(0.1)
 
 def set_html_in_div(driver, element, html_content):
     driver.execute_script("arguments[0].innerHTML = arguments[1];", element, html_content)
     driver.execute_script("arguments[0].dispatchEvent(new Event('input'));", element)
+
+
+def convert_shorthand_to_number(value):
+    """Chuyển đổi các giá trị dạng '4.2K', '1.1M' thành số nguyên. Nếu lỗi, trả về 0."""
+    if not value or not isinstance(value, str):  # Kiểm tra giá trị rỗng hoặc không phải chuỗi
+        return 0
+
+    suffixes = {
+        "K": 10**3,
+        "M": 10**6,
+        "B": 10**9,
+    }
+
+    match = re.match(r"([\d\.]+)([KMB]?)", value, re.IGNORECASE)
+    if match:
+        num, suffix = match.groups()
+        try:
+            num = float(num)
+            multiplier = suffixes.get(suffix.upper(), 1)
+            return int(num * multiplier)
+        except ValueError:
+            return 0  # Trường hợp lỗi khi chuyển đổi số
+    
+    return 0  # Nếu không khớp với pattern, trả về 0
