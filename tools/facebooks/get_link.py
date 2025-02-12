@@ -4,52 +4,67 @@ from time import sleep
 from tools.driver import Browser
 import logging
 from selenium.webdriver.common.by import By
-from time import sleep
 from sql.posts import Post
 from bs4 import BeautifulSoup
 from helpers.fb import clean_facebook_url_redirect
+
 link_process = get_link_process_instance()
-
-
 global_theard_event = get_global_theard_event()
+
 def start_crawl_web(tab_id, stop_event):
-    browser = Browser('/crawl')
-    browser.start(False)
-    link_process.update_process(tab_id,'Đang chuẩn bị cào dữ liệu....')
-    while not stop_event.is_set() and not global_theard_event.is_set():
-        link_process.update_process(tab_id,'Đang chuẩn bị cào dữ liệu....')
-        url = clean_facebook_url_redirect(url)
-        browser.get(url)  # Chuyển hướng
-        h1 = browser.find_element(By.CSS_SELECTOR, 'h1')
-        title = h1.text
-        html = browser.page_source
-
-        # Phân tích HTML và tìm thẻ <div> chứa nhiều thẻ <p> nhất
-        div_blocks = extract_div_with_p_tags(html)
-        main_div, num_p_tags = find_div_with_most_p_tags(div_blocks)
-        relevant_html = extract_relevant_tags(main_div)
-        response = Post().insert_post_web({'post': {
-            'content': relevant_html,
-            'link_facebook': url,
-            "title": title,
-            'images': []
-        }})
-        if response.get("status_code") == 200:
-            print("Bài viết đã được thêm vào database")
-        else:
-            print("Lỗi khi thêm bài viết vào database")
-        sleep(5)  # Đợi 10s
-    browser.quit()
-
-
+    try:
+        manager = Browser('/crawl')
+        browser = manager.start(False)
+        link_process.update_process(tab_id, 'Đang chuẩn bị cào dữ liệu....')
+        post = Post()
+        while not stop_event.is_set() and not global_theard_event.is_set():
+            try:
+                # Extract the link from the provided API object
+                url = post.get_url_by_post().get('link')
+                if not url:
+                    print("Không tìm thấy URL trong object API")
+                    continue
+                url = clean_facebook_url_redirect(url)
+                browser.get(url) 
+                link_process.update_process(tab_id, f'Đang cào dữ liệu {url}')
+                h1_element = browser.find_element(By.XPATH, '//h1[not(.//a)]')
+                title = h1_element.text
+                html = browser.page_source
+                # Phân tích HTML và tìm thẻ <div> chứa nhiều thẻ <p> nhất
+                div_blocks = extract_div_with_p_tags(html)
+                main_div, num_p_tags = find_div_with_most_p_tags(div_blocks)
+                relevant_html = extract_relevant_tags(main_div)
+                response = Post().insert_post_web({'post': {
+                    'content': relevant_html,
+                    'link_facebook': url,
+                    "title": title,
+                    'images': []
+                }})
+                if response.get("status_code") == 200:
+                    link_process.update_process(tab_id, f'Cào dữ liệu thành công {url}')
+                else:
+                    link_process.update_process(tab_id, f'Cào dữ liệu thất bại {url}')
+                sleep(5)  # Đợi 5s trước khi tiếp tục
+            except Exception as e:
+                logging.error(f"Lỗi khi cào dữ liệu từ {url}: {e}")
+                print(f"Lỗi khi cào dữ liệu từ {url}: {e}")
+                if browser:
+                    browser.quit()
+                browser = manager.start(False)
+    except Exception as e:
+        logging.error(f"Lỗi: {e}")
+        print(f"Lỗi: {e}")
+    finally:
+        if browser:
+            browser.quit()
 
 def extract_div_with_p_tags(html):
     soup = BeautifulSoup(html, 'html.parser')
     div_blocks = []
-
-    # Lọc tất cả các thẻ <p> và tìm thẻ <div> gần nhất chứa thẻ <p>
     for p in soup.find_all('p'):
-        div = p.find_parent('div')
+        div = p.find_parent(['div', 'article'])
+        while div and div.find('form'):
+            div = div.find_parent('div')
         if div:
             div_blocks.append(div)
     
@@ -68,43 +83,14 @@ def find_div_with_most_p_tags(div_blocks):
 
 def extract_relevant_tags(main_div):
     if main_div:
-        # Loại bỏ các thẻ <div> con
+        # Loại bỏ các thẻ <script> bên trong các thẻ <div> con
         for div in main_div.find_all('div'):
-            div.decompose()
+            for script in div.find_all('script'):
+                script.decompose()
+        
+        # Loại bỏ các thẻ <script> và <style> còn lại trong main_div
+        for tag in main_div.find_all(['script', 'style']):
+            tag.decompose()
+
         return main_div.decode_contents()
     return ""
-
-
-
-# def process_crawl(urls):
-#     try:
-#         manager = Browser('/crawl', loadContent=True)
-#         browser = manager.start(False)  # Khởi tạo trình duyệt
-#         for url in urls:
-#             url = clean_facebook_url_redirect(url)
-#             browser.get(url)  # Chuyển hướng
-#             h1 = browser.find_element(By.CSS_SELECTOR, 'h1')
-#             title = h1.text
-#             html = browser.page_source
-
-#             # Phân tích HTML và tìm thẻ <div> chứa nhiều thẻ <p> nhất
-#             div_blocks = extract_div_with_p_tags(html)
-#             main_div, num_p_tags = find_div_with_most_p_tags(div_blocks)
-#             relevant_html = extract_relevant_tags(main_div)
-#             response = Post().insert_post_web({'post': {
-#                 'content': relevant_html,
-#                 'link_facebook': url,
-#                 "title": title,
-#                 'images': []
-#             }})
-#             if response.get("status_code") == 200:
-#                 print("Bài viết đã được thêm vào database")
-#             else:
-#                 print("Lỗi khi thêm bài viết vào database")
-#             sleep(5)  # Đợi 10s
-#     except Exception as e:
-#         logging.error(f"Lỗi: {e}")
-#         print(f"Lỗi: {e}")
-#     finally:
-#         if browser:
-#             browser.quit()

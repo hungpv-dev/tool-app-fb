@@ -13,3 +13,5 @@ class Post(Model):
         return self.post("post-web/none", data=data)
     def insert_post_web(self, data):
         return self.post("post-web/store", data=data)
+    def get_url_by_post(self):
+        return self.get("get-url-by-post")
