@@ -113,15 +113,19 @@ def convert_shorthand_to_number(value):
     if not value or not isinstance(value, str):  # Kiểm tra giá trị rỗng hoặc không phải chuỗi
         return 0
 
+    value = value.strip()  # Loại bỏ khoảng trắng thừa
+    
     suffixes = {
         "K": 10**3,
         "M": 10**6,
         "B": 10**9,
     }
 
-    match = re.match(r"([\d\.]+)([KMB]?)", value, re.IGNORECASE)
+    match = re.search(r"([\d,.]+)([KMB]?)", value, re.IGNORECASE)
     if match:
         num, suffix = match.groups()
+        num = num.replace(",", "")  # Xóa dấu phẩy nếu có (vd: '1,2K' -> '12K')
+        
         try:
             num = float(num)
             multiplier = suffixes.get(suffix.upper(), 1)

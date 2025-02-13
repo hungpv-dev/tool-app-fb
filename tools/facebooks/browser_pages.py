@@ -89,6 +89,8 @@ class BrowserFanpage:
         logging.info(f'====== {name} ======')
         print(f'====== {name} ======')
         
+        if page.get('link'):
+            page['link'] = page['link'].rstrip('/')
         pageLinkPost = f"{page['link']}/posts/"
         pageLinkStory = "https://www.facebook.com/permalink.php"
         listPosts = self.browser.find_elements(By.XPATH, types['list_posts'])

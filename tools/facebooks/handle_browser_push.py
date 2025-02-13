@@ -232,6 +232,8 @@ class Push:
             pass
 
     def push(self,page,post,name):
+        if page.get('link'): 
+            page['link'] = page['link'].rstrip('/')
         self.browser.get(page['link'])
         # sleep(2)
         # self.browser.execute_script("document.body.style.zoom='0.4';")

@@ -183,18 +183,6 @@ class CrawlContentPost:
             logging.error(f"Không lấy được like, comment, share")
             print(f"Không lấy được like, comment, share")
 
-        try:
-            data['like'] = convert_shorthand_to_number(data['like'])
-        except Exception as e:
-            data['like'] = 0
-        try:
-            data['comment'] = convert_shorthand_to_number(data['comment']) or 0
-        except Exception as e:
-            data['comment'] = 0
-        try:
-            data['share'] = convert_shorthand_to_number(data['share']) or 0
-        except Exception as e:
-            data['share'] = 0
         # Lấy comment
         try:
             scroll = modal.find_element(By.XPATH,types['scroll'])
@@ -320,6 +308,19 @@ class CrawlContentPost:
             logging.error("Không lấy được bình luận!")
             print("Không lấy được bình luận!")
 
+
+        try:
+            data['like'] = convert_shorthand_to_number(data['like'])
+        except Exception as e:
+            data['like'] = 0
+        try:
+            data['comment'] = convert_shorthand_to_number(data['comment'])
+        except Exception as e:
+            data['comment'] = 0
+        try:
+            data['share'] = convert_shorthand_to_number(data['share'])
+        except Exception as e:
+            data['share'] = 0
 
         if newfeed:
             return {
@@ -524,7 +525,7 @@ class CrawlContentPost:
             print(f'==> Thời gian đăng: {data["time_up"]}')
             logging.error(f"Response: {res}")
             print(f"Response: {res}")
-            if 'post_id' in res and res['post_id']:
+            if res is not None and 'post_id' in res and res['post_id']:
                 if 'id' in his:
                     self.history_instance.update_count(his['id'], {'type': 'success'})
                 if newfeedid != 0:
