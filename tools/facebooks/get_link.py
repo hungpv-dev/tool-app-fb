@@ -49,7 +49,7 @@ def start_crawl_web(tab_id, stop_event):
                 div_blocks = extract_div_with_p_tags(html)
                 main_div, num_p_tags = find_div_with_most_p_tags(div_blocks)
                 relevant_html = extract_relevant_tags(main_div)
-                print(relevant_html)
+                
                 response = Post().insert_post_web({'post': {
                     'content': relevant_html,
                     'link_facebook': url,
@@ -78,12 +78,18 @@ def start_crawl_web(tab_id, stop_event):
 def extract_div_with_p_tags(html):
     soup = BeautifulSoup(html, 'html.parser')
     div_blocks = []
+
     for p in soup.find_all('p'):
-        div = p.find_parent(['div', 'article'])
-        while div and div.find('form'):
-            div = div.find_parent('div')
-        if div:
-            div_blocks.append(div)
+        parent = p.find_parent(['div', 'article'])
+        while parent and parent.find('form'):
+            parent = parent.find_parent('div')
+        if parent:
+            # If the parent is a <div> and contains an <article>, use the <article>
+            if parent.name == 'div' and parent.find('article'):
+                article = parent.find('article')
+                div_blocks.append(article)
+            else:
+                div_blocks.append(parent)
     
     return div_blocks
 
