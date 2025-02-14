@@ -13,6 +13,9 @@ from helpers.login import HandleLogin
 from extensions.auth_proxy import create_proxy_extension, check_proxy
 
 def login_page():
+    global timer
+    timer = None
+
     main_frame = get_frame()
 
     # Tiêu đề trang
@@ -21,19 +24,59 @@ def login_page():
     )
     title_label.pack(pady=20)
 
+    tk.Label(
+        main_frame, text="Tìm kiếm tài khoản:", font=("Segoe UI", 14), bg="#f0f2f5"
+    ).pack(pady=10)
+
+    search_entry = tk.Entry(main_frame, font=("Segoe UI", 12), width=40)
+    search_entry.pack(pady=10)
+
     # Hiển thị danh sách tài khoản
     tk.Label(
         main_frame, text="Danh sách tài khoản:", font=("Segoe UI", 16), bg="#f0f2f5"
     ).pack(pady=10)
 
-    # Lấy danh sách tài khoản từ phương thức `account.get_accounts()['data']`
-    try:
-        from sql.accounts import Account  # Import module chứa hàm lấy tài khoản
-        account = Account()
-        accounts = account.get_accounts()['data']  # Gọi phương thức lấy danh sách tài khoản
-    except Exception as e:
-        messagebox.showerror("Lỗi", f"Không thể lấy danh sách tài khoản: {e}")
-        accounts = []
+    def getListAccount(name = ""):
+        # Lấy danh sách tài khoản từ phương thức `account.get_accounts()['data']`
+        try:
+            from sql.accounts import Account  # Import module chứa hàm lấy tài khoản
+            account = Account()
+            accounts = account.get_accounts({
+                'name': name
+            })['data']  # Gọi phương thức lấy danh sách tài khoản
+        except Exception as e:
+            messagebox.showerror("Lỗi", f"Không thể lấy danh sách tài khoản: {e}")
+            accounts = []
+        return accounts
+    
+    accounts = getListAccount()
+
+    DEBOUNCE_DELAY = 300
+
+    def update_account_list(event=None):
+        search_term = search_entry.get().lower() 
+        accounts = getListAccount(search_term) 
+        filtered_accounts = [
+            f"{acc['name']} (ID: {acc['id']})" for acc in accounts if search_term in acc['name'].lower()
+        ]
+        account_combo['values'] = filtered_accounts
+        if filtered_accounts:
+            account_combo.set(filtered_accounts[0])
+        else:
+            account_combo.set("Không tìm thấy tài khoản")
+
+    def on_key_release(event=None):
+        global timer
+        # Hủy bỏ các callback trước đó nếu có
+        if timer is not None:
+            main_frame.after_cancel(timer)
+        # Thiết lập một callback mới sau thời gian trễ
+        timer = main_frame.after(DEBOUNCE_DELAY, update_account_list)
+
+
+    # Thiết lập sự kiện khi người dùng nhập từ khóa tìm kiếm
+    search_entry.bind("<KeyRelease>", on_key_release)
+
 
     # Hiển thị danh sách tài khoản trong combobox (sử dụng ID cho độ chính xác)
     account_var = tk.StringVar()

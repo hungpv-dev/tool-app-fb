@@ -26,8 +26,9 @@ class HandleLogin:
         return self.account
     
     def setAccount(self):
-        self.account_instance.setProxy(self.account.get('proxy'))
-        account = self.account_instance.find(self.account.get('id'))
+        id = self.account.get('id')
+        # self.account_instance.setProxy(self.account.get('proxy'))
+        account = Account().find(id)
         self.email = self.account.get('email_account')
         self.pwdEmail = self.account.get('email_password')
         self.user = self.account.get('login_account')
@@ -380,13 +381,13 @@ class HandleLogin:
                 dataUpdate['type_edit'] = 2
 
             sleep(1)
-            res = self.account_instance.update_account(self.account.get('id'),dataUpdate)
+            res = Account().update_account(self.account.get('id'),dataUpdate)
             check = True
             self.updateMainModel(f'Login thành công!')
             self.checkCapcha = True
         except Exception as e:
             print(f'Lỗi save: {e}')
-            self.account_instance.update_account(self.account.get('id'),{'status_login':1})
+            Account().update_account(self.account.get('id'),{'status_login':1})
         return check
     
     def checkBlock(self):
@@ -469,15 +470,13 @@ class HandleLogin:
         # 1: Chết cookie
         # 2: Cookie đang sống
         from sql.account_cookies import AccountCookies
-        account_cookies = AccountCookies()
-        account_cookies.update(cookie_id,{'status': status})
+        AccountCookies().update(cookie_id,{'status': status})
 
     def updateStatusAcount(self,account_id, status):
         # 1: Lỗi cookie,
         # 2: Đang hoạt động,
         # 3: Đang lấy dữ liệu...,
         # 4: Đang đăng bài...
-        account_instance = Account()
-        account_instance.update_account(account_id, {'status_login': status})
+        Account().update_account(account_id, {'status_login': status})
             
 
