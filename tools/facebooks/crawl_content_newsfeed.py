@@ -58,15 +58,15 @@ class CrawContentNewsfeed:
                 self.crawlNewFeed(account,stop_event) 
             except ValueError as e:
                 newsfeed_process_instance.update_process(self.account.get('id'),'Login thất bài, thử lại sau 1p...')
-                if self.system_account:
-                    system_instance.push_message(self.system_account.get('id'),'Đăng nhập thất bại!')
+                # if self.system_account:
+                #     system_instance.push_message(self.system_account.get('id'),'Đăng nhập thất bại!')
                 logging.error(f"Lỗi khi xử lý lấy dữ liệu!: {e}")
                 print(f"Lỗi khi xử lý lấy dữ liệu!: {e}")
                 self.error_instance.insertContent(e)
                 if sendNoti:
                     if self.account.get("name"):
                         send(f"Tài khoản {self.account.get('name')} không thể đăng nhập!")
-                    sendNoti = False
+                        sendNoti = False
                 if self.browser is None or not self.browser.service.is_connectable():
                     raise e
             except Exception as e:
@@ -141,17 +141,14 @@ class PageChecker:
             }
 
             if allPages: 
-                names = []
-
                 for idx, page in enumerate(allPages):
                     if stop_event.is_set():
                         break
                     name = remove_notifications(page.text).strip()
                     logging.info(f'=================={name}================')
                     print(f'=================={name}================')
-                    names.append(name)
                     # Khởi tạo các process
-                    thread = Thread(target=process_fanpage, args=(account, name,self.dirextension, stop_event, managerDriver, self.system_account))
+                    thread = Thread(target=process_fanpage, args=(account, name, self.dirextension, stop_event, managerDriver, self.system_account))
                     threads.append(thread)
                     thread.start()
                     sleep(2)
@@ -161,14 +158,11 @@ class PageChecker:
                 theardAccount.start()
                 threads.append(theardAccount)
 
-                print(f'Danh sách fanpage: {names}')
-
-                if account.get("name"):
-                    send(f'{account.get("name")} cào newsfeed: {", ".join(names)}')
+                # if account.get("name"):
+                #     send(f'{account.get("name")} cào newsfeed: {", ".join(names)}')
                 for thread in threads:
                     thread.join()
             else: 
                 newsfeed_process_instance.update_process(account.get('id'), f'Không sở hữu fanpage nào!')
-
         except Exception as e:
             raise e

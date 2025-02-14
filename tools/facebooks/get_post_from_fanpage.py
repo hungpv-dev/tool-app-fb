@@ -33,7 +33,7 @@ def process_crawl(id, stop_event):
                 browser.quit()
             sleep(10)
 
-    send(f'Tab cào fanpage mã: {id} đã bị đóng')
+    # send(f'Tab cào fanpage mã: {id} đã bị đóng')
     fanpage_process_instance.update_process(id,'Tab đã bị đóng, xoá và chạy lại...')
 
 

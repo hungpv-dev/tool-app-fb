@@ -64,7 +64,7 @@ def push_page(page,account,dirextension,stop_event,system_account = None):
 
             logging.error(f'Bắt đầu theo dõi page: {name}')
             print(f'Bắt đầu theo dõi page: {name}')
-            updateSystemMessage(system_account,f'Bắt đầu đăng page: {name}')
+            # updateSystemMessage(system_account,f'Bắt đầu đăng page: {name}')
             retry_count = {}
             while not stop_event.is_set() and not global_theard_event.is_set():
                 if account is None:
@@ -131,8 +131,8 @@ def push_page(page,account,dirextension,stop_event,system_account = None):
                                 sleep(1)
                             break
                         except NoSuchElementException as e:
+                            post_process_instance.update_process(account.get('id'),'Không thể đăng nhập')
                             post_process_instance.update_time(account.get('id'),"status_page","")
-                            post_process_instance.update_time(account.get('id'),"status_list","")
                             page_post_instance.update_status(pageUP['id'], {'status': 1})
                             break
                         except Exception as e:
@@ -168,8 +168,8 @@ def push_page(page,account,dirextension,stop_event,system_account = None):
                 manager.cleanup()
             browser = None
             manager = None
+            post_process_instance.update_process(account.get('id'),'Đang thử lại')
             post_process_instance.update_time(account.get('id'),"status_page","")
-            post_process_instance.update_time(account.get('id'),"status_list","")
     print('Dừng xử lý đăng bài page')
     
 
@@ -239,22 +239,23 @@ def push_list(account, managerDriver, dirextension,stop_event,system_account = N
                     print(f'{account.get("name")} login thất bại, đợi 1p...')
                     logging.error(f'{account.get("name")} login thất bại, đợi 1p...')
                     loginInstance = HandleLogin(browser,account) 
+                    if sendNoti:
+                        if account.get("name"):
+                            send(f"Tài khoản {account.get('name')} không thể đăng nhập!")
+                        sendNoti = False
                     while not stop_event.is_set() and not global_theard_event.is_set():
                         if account is None:
                             break
                         checkLogin = loginInstance.loginFacebook(sendNoti)
                         if checkLogin == False:
-                            updateSystemMessage(system_account,'Login thất bại')
+                            # updateSystemMessage(system_account,'Login thất bại')
+                            post_process_instance.update_process(account.get('id'),'Không thể đăng nhập')
                             print('Đợi 1p rồi thử login lại!')
                             sleep(60)
                         else:
-                            if account.get("name"):
-                                send(f"Tài khoản {account.get('name')} bắt đầu đăng bài!")
+                            # if account.get("name"):
+                            #     send(f"Tài khoản {account.get('name')} bắt đầu đăng bài!")
                             break
-                    if sendNoti:
-                        if account.get("name"):
-                            send(f"Tài khoản {account.get('name')} không thể đăng nhập!")
-                        sendNoti = False
                     sleep(2)
                 
                 sendNoti = True
@@ -276,7 +277,7 @@ def push_list(account, managerDriver, dirextension,stop_event,system_account = N
                                 # post_process_instance.update_process(account.get('id'),f"Xử lý đăng bài: {post['id']}")
                                 page = post.get('page')
                                 name = push.switchPage(page,stop_event)
-                                updateSystemMessage(system_account,f'Bắt đầu đăng page: {name}')
+                                # updateSystemMessage(system_account,f'Bắt đầu đăng page: {name}')
                                 profile_button = browser.find_element(By.XPATH, pushType['openProfile'])
                                 push.push(page,post,name)
                                 page_post_instance.update_status(post['id'],{
@@ -293,8 +294,8 @@ def push_list(account, managerDriver, dirextension,stop_event,system_account = N
                                     sleep(1)
                                 break
                             except NoSuchElementException as e:
+                                post_process_instance.update_process(account.get('id'),'Không thể đăng nhập')
                                 page_post_instance.update_status(post['id'], {'status': 1})
-                                post_process_instance.update_time(account.get('id'),"status_page","")
                                 post_process_instance.update_time(account.get('id'),"status_list","")
                                 break
                             except Exception as e:
@@ -328,7 +329,7 @@ def push_list(account, managerDriver, dirextension,stop_event,system_account = N
                 manager.cleanup()
             browser = None
             manager = None
-            post_process_instance.update_time(account.get('id'),"status_page","")
+            post_process_instance.update_process(account.get('id'),'Đang thử lại...')
             post_process_instance.update_time(account.get('id'),"status_list","")
             logging.error('Lỗi khi đăng bài time,thử lại sau 30s')
             print('Lỗi khi đăng bài time,thử lại sau 30s')

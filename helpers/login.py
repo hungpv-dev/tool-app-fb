@@ -156,7 +156,6 @@ class HandleLogin:
             if src == '':
                 raise ValueError('Khôgn tìm thấy img captcha')
             
-            # send(f'{self.account.get("name")} bắt đầu xử lý captcha để đăng nhập')
             code = captcha_instance.getCode(src)
             if self.account.get("name"):
                 send(f'{self.account.get("name")} lấy từ captchat: {code}')

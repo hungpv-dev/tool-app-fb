@@ -68,8 +68,8 @@ class Push:
             except ValueError as e:
                 post_process_instance.update_process(self.account.get('id'),'Login thất bài, thử lại sau 1p...')
                 logging.error(f"Lỗi khi xử lý đăng bài viết!: {e}")
-                if self.system_account:
-                    system_instance.push_message(self.system_account.get('id'),'Đăng nhập thất bại!')
+                # if self.system_account:
+                #     system_instance.push_message(self.system_account.get('id'),'Đăng nhập thất bại!')
                 logging.error(f"Lỗi khi xử lý đăng bài viết!: {e}")
                 print(f"Lỗi khi xử lý đăng bài viết!: {e}")
                 self.error_instance.insertContent(e)
@@ -112,8 +112,8 @@ class Push:
                 print(e)
 
             
-            if self.account.get("name"):
-                send(f'{self.account.get("name")} đăng bài trên: {", ".join(names)}')
+            # if self.account.get("name"):
+            #     send(f'{self.account.get("name")} đăng bài trên: {", ".join(names)}')
                 
             managerDriver = {
                 'browser': self.browser,

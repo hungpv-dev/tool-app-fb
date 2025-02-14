@@ -60,7 +60,7 @@ def process_post(account,stop_event):
             logging.error(e)
             error_instance.insertContent(e)
             post_process_instance.update_process(account.get('id'),'Trình duyệt bị đóng, đợi 30s...')
-            system_instance.push_message(system_account.get('id'),'Không khởi tạo được trình duyệt')
+            # system_instance.push_message(system_account.get('id'),'Không khởi tạo được trình duyệt')
             account = account_instance.find(account['id'])
         finally:
             if browser:

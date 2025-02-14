@@ -114,28 +114,30 @@ def handleCrawlNewFeedVie(account, managerDriver ,dirextension = None, stop_even
                 while not stop_event.is_set() and not global_theard_event.is_set() and process['status_vie'] == 2: 
                     if account is None:
                         break
-                    updateSystemMessage(system_account,'Bắt đầu cào vie')
+                    # updateSystemMessage(system_account,'Bắt đầu cào vie')
                     try:
                         clickOk(browser)
                         profile_button = browser.find_element(By.XPATH, push['openProfile'])
                         loginInstance.updateStatusAcount(account.get('id'),3)
                     except NoSuchElementException as e:
+                        if sendNoti:
+                            if account.get("name"):
+                                send(f"Tài khoản {account.get('name')} không thể đăng nhập!")
+                            sendNoti = False
+
                         while not stop_event.is_set() and not global_theard_event.is_set():
                             if account is None:
                                 break
                             checkLogin = loginInstance.loginFacebook(sendNoti)
                             if checkLogin == False:
-                                updateSystemMessage(system_account,'Login thất bại')
+                                # updateSystemMessage(system_account,'Login thất bại')
+                                sendNoti = False
                                 print('Đợi 1p rồi thử login lại!')
                                 sleep(60)
                             else:
-                                if account.get("name"):
-                                    send(f"Tài khoản {account.get('name')} bắt đầu cào newsfeed!")
+                                # if account.get("name"):
+                                #     send(f"Tài khoản {account.get('name')} bắt đầu cào newsfeed!")
                                 break
-                        if sendNoti:
-                            if account.get("name"):
-                                send(f"Tài khoản {account.get('name')} không thể đăng nhập!")
-                            sendNoti = False
                         sleep(2)
                     except Exception as e:
                         raise e
@@ -197,7 +199,7 @@ def handleCrawlNewFeedVie(account, managerDriver ,dirextension = None, stop_even
                         browser.execute_script("window.scrollBy(0, 500);")
                     sleep(5)
                     process = newsfeed_process_instance.show(account.get('id'))
-                updateSystemMessage(system_account,'Tắt cào vie')
+                # updateSystemMessage(system_account,'Tắt cào vie')
                 sleep(30)
         except Exception as e:
             browser.quit()

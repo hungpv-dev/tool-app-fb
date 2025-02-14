@@ -54,7 +54,7 @@ def process_newsfeed(account, stop_event):
                 newsfeed_process_instance.update_process(account.get('id'),'Đã khởi tạo trình duyệt')
             else:
                 newsfeed_process_instance.update_process(account.get('id'),'Proxy không dùng được')
-                system_instance.push_message(system_account.get('id'),'Không dùng được proxy')
+                # system_instance.push_message(system_account.get('id'),'Không dùng được proxy')
                 raise Exception("Proxy không hợp lệ")
 
             # browser.get('https://whatismyipaddress.com')
@@ -67,7 +67,7 @@ def process_newsfeed(account, stop_event):
         except Exception as e:
             error_instance.insertContent(e)
             newsfeed_process_instance.update_process(account.get('id'),'Không thể khởi tạo trình duyệt, đợi 30s...')
-            system_instance.push_message(system_account.get('id'),'Không khởi tạo được trình duyệt')
+            # system_instance.push_message(system_account.get('id'),'Không khởi tạo được trình duyệt')
             account = account_instance.find(account['id'])
         finally:
             if browser:
