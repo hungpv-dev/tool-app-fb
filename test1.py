@@ -72,8 +72,9 @@ def extract_relevant_tags(main_div):
 # Ví dụ sử dụng
 def main(url):
     response = requests.get(url)
+    print(f"Status Code: {response.status_code}")
     html = response.text
-  
+   
     div_blocks = extract_div_with_p_tags(html)
    
     main_div, num_p_tags = find_div_with_most_p_tags(div_blocks)
@@ -81,5 +82,5 @@ def main(url):
     relevant_html = extract_relevant_tags(main_div)
     print(relevant_html)
 # Truyền URL vào hàm main
-url = "https://lifenews.livextop.com/b2be9x-bich123-97c79371c4e4#goog_rewarded"  # Thay thế bằng URL bạn muốn phân tích
+url = "https://news.megos.online/326004?utm_source=My1107&utm_medium=RappersMusic&utm_campaign=MediGo"  # Thay thế bằng URL bạn muốn phân tích
 main(url)

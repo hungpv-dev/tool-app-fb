@@ -45,8 +45,17 @@ def start_crawl_web(tab_id, stop_event):
                     post.put_url_by_post(data.get('id'))
                     continue  # Bỏ qua và tiếp tục với URL tiếp theo
                 html = browser.page_source
-                # Phân tích HTML và tìm thẻ <div> chứa nhiều thẻ <p> nhất
+                # error_indicators = ["404", "Page Not Found", "not found","Sorry, you have been blocked",'Connection timed out Error code 522','Loading…']
+                # found_errors = [indicator for indicator in error_indicators if indicator.lower() in html.lower()]
+                
+                # if found_errors:
+                #     error_message = "Error: The requested URL was not found on the server. Indicators: " + ", ".join(found_errors)
+                #     link_process.update_process(tab_id, error_message)
+                #     post.put_url_by_post(data.get('id'))
+                #     continue  # Bỏ qua và tiếp tục với URL tiếp theo
+       
                 div_blocks = extract_div_with_p_tags(html)
+                
                 main_div, num_p_tags = find_div_with_most_p_tags(div_blocks)
                 relevant_html = extract_relevant_tags(main_div)
                 response = Post().insert_post_web({'post': {
