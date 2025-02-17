@@ -187,7 +187,8 @@ def push_list(account, managerDriver, dirextension,stop_event,system_account = N
     init = True
     manager = managerDriver.get('manager')
     browser = managerDriver.get('browser')
-    sendNoti = True
+    sendNoti = 500
+    sendNotiInfo = False
     while not stop_event.is_set() and not global_theard_event.is_set():
         if account is None:
             break
@@ -236,29 +237,35 @@ def push_list(account, managerDriver, dirextension,stop_event,system_account = N
                     profile_button = browser.find_element(By.XPATH, pushType['openProfile'])
                     loginInstance.updateStatusAcount(account.get('id'),4)
                 except NoSuchElementException as e:
+                    sendNotiInfo = True
                     print(f'{account.get("name")} login thất bại, đợi 1p...')
                     logging.error(f'{account.get("name")} login thất bại, đợi 1p...')
                     loginInstance = HandleLogin(browser,account) 
-                    if sendNoti:
+                    post_process_instance.update_process(account.get('id'),'Không thể đăng nhập')
+                    if sendNoti >= 500:
                         if account.get("name"):
                             send(f"Tài khoản {account.get('name')} không thể đăng nhập!")
-                        sendNoti = False
+                        sendNoti = 0
                     while not stop_event.is_set() and not global_theard_event.is_set():
                         if account is None:
                             break
                         checkLogin = loginInstance.loginFacebook(sendNoti)
                         if checkLogin == False:
                             # updateSystemMessage(system_account,'Login thất bại')
-                            post_process_instance.update_process(account.get('id'),'Không thể đăng nhập')
+                            post_process_instance.update_process(account.get('id'),'Không thể đăng nhập, chờ 1p...')
                             print('Đợi 1p rồi thử login lại!')
                             sleep(60)
+                            sendNoti += 60
                         else:
                             # if account.get("name"):
                             #     send(f"Tài khoản {account.get('name')} bắt đầu đăng bài!")
                             break
                     sleep(2)
-                
-                sendNoti = True
+                if sendNotiInfo:
+                    send(f"Tài khoản {account.get('name')} đăng nhập thành công!")
+                    sendNotiInfo = False
+                sendNoti = 500
+                post_process_instance.update_process(account.get('id'),'Đăng nhập thành công')
                 
                 # browser.get('https://facebook.com')
                 posts = browseTime(account)
@@ -329,7 +336,7 @@ def push_list(account, managerDriver, dirextension,stop_event,system_account = N
                 manager.cleanup()
             browser = None
             manager = None
-            post_process_instance.update_process(account.get('id'),'Đang thử lại...')
+            post_process_instance.update_process(account.get('id'),'Lỗi, đang thử lại...')
             post_process_instance.update_time(account.get('id'),"status_list","")
             logging.error('Lỗi khi đăng bài time,thử lại sau 30s')
             print('Lỗi khi đăng bài time,thử lại sau 30s')

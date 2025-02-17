@@ -10,6 +10,7 @@ import logging
 from sql.system import System
 from bot import send
 import uuid
+from helpers.system import create_notification
 
 account_instance = Account()
 error_instance = Error()
@@ -20,7 +21,6 @@ newsfeed_process_instance = get_newsfeed_process_instance()
 def process_newsfeed(account, stop_event):
     from helpers.global_value import get_global_theard_event
     global_theard_event = get_global_theard_event()
-
     browser = None
     manager = None
     system_account = system_instance.create_account({

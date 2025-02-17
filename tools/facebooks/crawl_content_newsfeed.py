@@ -19,6 +19,7 @@ from sql.system import System
 from helpers.modal import openProfile,remove_notifications,clickOk
 system_instance = System()
 from bot import send
+from helpers.system import create_notification
 from main.newsfeed import get_newsfeed_process_instance
 from helpers.global_value import get_global_theard_event
 global_theard_event = get_global_theard_event()
@@ -38,41 +39,45 @@ class CrawContentNewsfeed:
 
     def handle(self,stop_event):
         loginInstance = HandleLogin(self.browser,self.account,newsfeed_process_instance)
-        sendNoti = True
+        sendNoti = 500
+        newsfeed_process_instance.update_process(self.account.get('id'),'Bắt đầu đăng nhập')
         while not stop_event.is_set() and not global_theard_event.is_set():
             if self.account is None:
                 break
             try:
-                newsfeed_process_instance.update_process(self.account.get('id'),'Bắt đầu đăng nhập')
                 # log_newsfeed(self.account,f'* Bắt đầu ({self.account["name"]}) *')
                 logging.info(f'==================Newsfeed ({self.account["name"]})================')
                 print(f'==================Newsfeed ({self.account["name"]})================')
                 checkLogin = loginInstance.loginFacebook(sendNoti)
                 if checkLogin == False:
                     raise ValueError('Không thể login')
-                sendNoti = True
+                sendNoti = 500
                 account = loginInstance.getAccount()
+                send(f"{self.account.get('name')}: đăng nhập thành công!")
                 newsfeed_process_instance.update_process(self.account.get('id'),'Đăng nhập thành công')
                 self.account = account
                 loginInstance.updateStatusAcount(self.account['id'],3) # Đang lấy
                 self.crawlNewFeed(account,stop_event) 
             except ValueError as e:
+                logging.error(f"Lỗi khi xử lý lấy dữ liệu!: {e}")
+                print(f"Lỗi khi xử lý lấy dữ liệu!: {e}")
                 newsfeed_process_instance.update_process(self.account.get('id'),'Login thất bài, thử lại sau 1p...')
                 # if self.system_account:
                 #     system_instance.push_message(self.system_account.get('id'),'Đăng nhập thất bại!')
-                logging.error(f"Lỗi khi xử lý lấy dữ liệu!: {e}")
-                print(f"Lỗi khi xử lý lấy dữ liệu!: {e}")
                 self.error_instance.insertContent(e)
-                if sendNoti:
+                if sendNoti >= 500:
                     if self.account.get("name"):
                         send(f"Tài khoản {self.account.get('name')} không thể đăng nhập!")
-                        sendNoti = False
+                        create_notification(f"Tài khoản {self.account.get('name')} không thể đăng nhập!")
+                        sendNoti = 0
+
                 if self.browser is None or not self.browser.service.is_connectable():
                     raise e
             except Exception as e:
                 print(f'Lỗi: {e}')
                 raise e
             finally:
+                sendNoti += 60
                 logging.error("Thử lại sau 1 phút...")
                 print("Thử lại sau 1 phút...")
                 sleep(60)

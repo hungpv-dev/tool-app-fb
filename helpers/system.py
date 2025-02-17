@@ -12,6 +12,7 @@ from bot import send
 from sql.system import System
 from helpers.global_value import get_global_theard_event
 global_theard_event = get_global_theard_event()
+from plyer import notification
 
 def get_system_info():
     try:
@@ -88,3 +89,11 @@ def start_clear_cache_thread():
     # Tạo một thread mới để chạy clear_cache
     thread = Thread(target=clear_cache, daemon=True)
     thread.start()
+
+def create_notification(message):
+    notification.notify(    
+        title='Thông báo',
+        message=message,
+        app_name='Asfy tool',
+        timeout=1
+    )

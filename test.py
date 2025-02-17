@@ -164,31 +164,32 @@ class Test:
         driver.quit()
     
     def crawl(self,id):
-        # acc = account_instance.find(id)
-        # if not acc: return
-        # extension = create_proxy_extension(acc.get('proxy'))
-        # manager = Browser(f'/test/{id}',extension,loadContent=True)
-        # driver = manager.start(False)
-        # sleep(3)
-        # loginInstance = HandleLogin(driver,acc)
-        # checkLogin = loginInstance.loginFacebook()
-        # if checkLogin == False: return
-        crawl_instance = CrawlContentPost(browser=None)
-        # up = {
-        #     'id': 'pfbid0MGw8R1PD4giDCnDJD5LTeQoDC5XXAHcf4aDxp7NEa6F1s8DE9ErKJVh2w26KWA22l',
-        #     'link': 'https://www.facebook.com/permalink.php?story_fbid=pfbid02WrGjAQdLJdeFUtBWyvXFvRiQue894H1H7GJN4e1AzhVnFJnDDFniBr7qLqq8vMCal&id=61559634869129',
-        # }
-        # print('Chuẩn bị')
-        # sleep(10)
-        # driver.get(up['link'])
-        # sleep(1)
-        # data = crawl_instance.crawlContentPost({},up,{
-        #     'newsfeed': 1,
-        # },True)
+        acc = account_instance.find(id)
+        if not acc: return
+        extension = create_proxy_extension(acc.get('proxy'))
+        manager = Browser(f'/test/{id}',extension,loadContent=True)
+        driver = manager.start(False)
+        sleep(3)
+        loginInstance = HandleLogin(driver,acc)
+        checkLogin = loginInstance.loginFacebook()
+        if checkLogin == False: return
+        crawl_instance = CrawlContentPost(driver)
+        up = {
+            'id': '122189550938145332',
+            'link': 'https://www.facebook.com/permalink.php?story_fbid=122189550938145332&id=61554359969672',
+        }
+        print('Chuẩn bị')
+        sleep(10)
+        driver.get(up['link'])
+        sleep(1)
+        data = crawl_instance.crawlContentPost({},up,{
+            'newsfeed': 1,
+        },True)
+        print(json.dumps(data, indent=4))
         # sleep(2)
-        crawl_instance.insertPostAndComment({
-            ''
-        },[], {})
+        # crawl_instance.insertPostAndComment({
+        #     ''
+        # },[], {})
         # crawl_instance.shareCopyLink()
         # crawl_instance.sharePostAndOpenNotify()
         # icon = crawl_instance.likePost()
@@ -205,4 +206,4 @@ class Test:
 # Đăng bài
 test = Test()
 # test.post(83)
-test.crawl(83)
+test.crawl(106)

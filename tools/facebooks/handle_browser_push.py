@@ -48,7 +48,7 @@ class Push:
         
     def handle(self,stop_event):
         loginInstance = HandleLogin(self.browser,self.account,post_process_instance)
-        sendNoti = True
+        sendNoti = 500
         while not stop_event.is_set() and not global_theard_event.is_set():
             if self.account is None:
                 break
@@ -59,7 +59,8 @@ class Push:
                 checkLogin = loginInstance.loginFacebook(sendNoti)
                 if checkLogin == False:
                     raise ValueError('Không thể login')
-                sendNoti = True
+                sendNoti = 500
+                send(f"{self.account.get('name')}: đăng nhập thành công!")
                 account = loginInstance.getAccount()
                 post_process_instance.update_process(self.account.get('id'),'Đăng nhập thành công')
                 self.account = account
@@ -73,16 +74,17 @@ class Push:
                 logging.error(f"Lỗi khi xử lý đăng bài viết!: {e}")
                 print(f"Lỗi khi xử lý đăng bài viết!: {e}")
                 self.error_instance.insertContent(e)
-                if sendNoti:
+                if sendNoti >= 500:
                     if self.account.get("name"):
                         send(f"Tài khoản {self.account.get('name')} không thể đăng nhập!")
-                    sendNoti = False
+                    sendNoti = 0
                 if self.browser is None or not self.browser.service.is_connectable():
                     raise e
             except Exception as e:
                 print(f'Lỗi: {e}')
                 raise e
             finally:
+                sendNoti += 60
                 logging.error("Thử lại sau 1 phút...")
                 print("Thử lại sau 1 phút...")
                 sleep(60)

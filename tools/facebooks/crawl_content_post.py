@@ -295,10 +295,11 @@ class CrawlContentPost:
                     continue
 
                 countComment += 1
+                print(f'Link gốc: {link_comment}')
                 dataComment.append({
                     'user_name': user_name,
                     'content': textContentComment,
-                    'link_comment': clean_facebook_url_redirect(link_comment),
+                    'link_comment': [clean_facebook_url_redirect(url) for url in link_comment],
                 })
             logging.error(f"=> Lưu được {len(dataComment)} bình luận!")
             print(f"=> Lưu được {len(dataComment)} bình luận!")
@@ -321,6 +322,13 @@ class CrawlContentPost:
             data['share'] = convert_shorthand_to_number(data['share'])
         except Exception as e:
             data['share'] = 0
+
+        try:
+            images = data.get('media').get('images')
+            filtered_images = [img for img in images if 'facebook_icons' not in img]
+            data['media']['images'] = filtered_images
+        except Exception as e:
+            print(e)
 
         if newfeed:
             return {
@@ -588,4 +596,4 @@ def extract_facebook_content(modal):
     except Exception as e:
         logging.error(f'Không tìm thấy nội dung')
         print(f'Không tìm thấy nội dung')
-        return ''
+        return '', []

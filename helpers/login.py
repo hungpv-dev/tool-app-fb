@@ -40,7 +40,7 @@ class HandleLogin:
             self.main_model.update_process(self.account.get('id'),text)
     
 
-    def loginFacebook(self,sendNoti = True):
+    def loginFacebook(self,sendNoti = 0):
         self.sendNoti = sendNoti
         self.setAccount()
         try:
@@ -53,10 +53,9 @@ class HandleLogin:
             self.saveAlowCookie()
             
             try:
-                self.updateMainModel('Login với cookie')
                 self.login()
             except Exception as e:
-                self.updateMainModel('Không thể login với cookie')
+                self.updateMainModel('Đăng nhập thất bại')
                 pass
 
             self.saveAlowCookie()
@@ -64,7 +63,7 @@ class HandleLogin:
             sleep(2)
             print(f'Login success: {check}')
             if check == False:
-                self.updateMainModel('Login với username, password')
+                self.updateMainModel('Đăng nhập thất bại, đang thử lại...')
                 self.driver.get("https://facebook.com/login")
                 sleep(3)
                 self.driver.find_element(By.ID,'email').send_keys(self.user)
@@ -105,11 +104,11 @@ class HandleLogin:
                         )
                         logging.info(f'{self.account.get("name")} lấy mã xác thực App Authenticate')
                         print(f'{self.account.get("name")} lấy mã xác thực App Authenticate')
-                        self.updateMainModel('Login với 2fa')
+                        # self.updateMainModel('Login với 2fa')
                         authenapp.click()
                         self.clickText('Continue')
                         code = self.getCode2Fa()
-                        self.updateMainModel(f'Code là: {code}')
+                        # self.updateMainModel(f'Code là: {code}')
                         check = self.pushCode(code)
                     except NoSuchElementException as e:
                         try:
@@ -129,7 +128,7 @@ class HandleLogin:
                             #     self.updateMainModel(f'Code là: {code}')
                             #     check = self.pushCode(code)
                             # except Exception as e:
-                                print(f'OUTLOOK: {e}')
+                                print(f'OUTLOOK: không có')
                                 self.account_instance.update_account(self.account.get('id'),{'status_login':1})
                                 logging.error(f'{self.account.get("name")} lấy mã từ Audio (chiu)')
                                 print(f'{self.account.get("name")} lấy mã từ Audio (chiu)')
@@ -360,7 +359,7 @@ class HandleLogin:
             checkBlock = self.checkBlock()
             # print(f"Check block: {checkBlock}")
             if checkBlock:
-                if self.sendNoti:
+                if self.sendNoti >= 500:
                     if self.account.get("name"):
                         send(f"Tài khoản: {self.account.get('name')} đã bị khoá")
                 self.updateMainModel('Tài khoản đã bị khoá!')
@@ -386,7 +385,7 @@ class HandleLogin:
             self.updateMainModel(f'Login thành công!')
             self.checkCapcha = True
         except Exception as e:
-            print(f'Lỗi save: {e}')
+            print(f'Lỗi save')
             Account().update_account(self.account.get('id'),{'status_login':1})
         return check
     

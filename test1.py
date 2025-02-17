@@ -55,7 +55,11 @@
 # relevant_html = extract_relevant_tags(main_div)
 
 
-from sql.accounts import Account
+# from sql.accounts import Account
 
-acc = Account().find(126)
-print(acc)
+# acc = Account().find(126)
+# print(acc)
+
+href = "https://l.facebook.com/l.php?u=https%3A%2F%2Fautulu.com%2Fviet%2Fpatrick-mahomes-broke-down-in-tears-after-a-9-year-old-girl-gave-him-a-secret-letter-during-the-game%2F%3Ffbclid%3DIwZXh0bgNhZW0CMTAAAR0mcXnNaa6Z79ICfiPjt8HuLNxRr9HehcfHDdGsU0yr4UuPO23OoUKGql8_aem_4s3BiKS-3VCdS3yV-UrJXA&h=AT1KmgpCdzFESSG7y_ak7mInsWb_Fx4fnw_gCZYsGiuIBFVplBKgmoLGRyh_eFaO9AqTz_a828tXl0VYfbxOS1TespCJWnUOi788HX-wg28kDG7DrGy6xcnq77liXRzypY5fgkqe0hhx9us6&__tn__=R]-R&c[0]=AT2SmTQ2JNDWBBP4XhyfC6hrBYaYbd6hh6AHUX1LZOkwFgyBpexrr4JArDeOATVKJitTAlZdPHoFtqGSCd4OfSlsMLj8AMPm96Qmg2SfOqJHZxc27i3cbmzzyGwJyEMyy61cEPY01mhKf5LPm4YzSWXLV-B_h-ZkebM7lo7OX1S_mQNqeMX6PJOi4cb8q-Y3Jre9Sw"
+from helpers.fb import clean_url_keep_params,clean_facebook_url_redirect,convert_shorthand_to_number
+print(clean_facebook_url_redirect(href))

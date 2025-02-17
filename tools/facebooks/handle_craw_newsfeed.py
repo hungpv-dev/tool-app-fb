@@ -42,11 +42,12 @@ def handleCrawlNewFeedVie(account, managerDriver ,dirextension = None, stop_even
     manager = managerDriver.get('manager')
     browser = managerDriver.get('browser')
     init = True
-    sendNoti = True
+    sendNoti = 500
     pageLinkPost = f"/posts/"
     pageLinkStory = "https://www.facebook.com/permalink.php"
     # newfeed_instance.setProxy(account.get('proxy'))
     loginInstance = HandleLogin(browser,account,newsfeed_process_instance)
+    sendNotiInfo = False
     while not stop_event.is_set() and not global_theard_event.is_set():
         if account is None:
             break
@@ -80,22 +81,29 @@ def handleCrawlNewFeedVie(account, managerDriver ,dirextension = None, stop_even
                     profile_button = browser.find_element(By.XPATH, push['openProfile'])
                     loginInstance.updateStatusAcount(account.get('id'),3)
                 except NoSuchElementException as e:
-                    newsfeed_process_instance.update_process(account.get('id'),'Chờ 1p để login lại')
+                    sendNotiInfo = True
+                    newsfeed_process_instance.update_process(account.get('id'),'Đăng nhập thất bại, chờ 1p...')
                     print(f'{account.get("name")} login thất bại, đợi 1p...')
                     logging.error(f'{account.get("name")} login thất bại, đợi 1p...')
-                    if sendNoti:
+                    if sendNoti >= 500:
                         if account.get("name"):
                             send(f"Tài khoản {account.get('name')} không thể đăng nhập!")
-                        sendNoti = False
+                        sendNoti = 0
                     sleep(60)
+                    sendNoti += 60
                     try:
                         loginInstance.setAccount()
                         loginInstance.login()
                     except Exception as e:
                         print('Looxi: {e}')
                     continue
+                
+                if sendNotiInfo:
+                    send(f"Tài khoản {account.get('name')} đăng nhập thành công!")
+                    sendNotiInfo = False
+                sendNoti = 500
+                newsfeed_process_instance.update_process(account.get('id'),'Đăng nhập thành công')
 
-                sendNoti = True
                 browser.get('https://facebook.com')
                 if process['status_vie'] == 1:
                     sleep(60)
@@ -120,10 +128,12 @@ def handleCrawlNewFeedVie(account, managerDriver ,dirextension = None, stop_even
                         profile_button = browser.find_element(By.XPATH, push['openProfile'])
                         loginInstance.updateStatusAcount(account.get('id'),3)
                     except NoSuchElementException as e:
-                        if sendNoti:
+                        sendNotiInfo = True
+                        newsfeed_process_instance.update_process(account.get('id'),'Không thể đăng nhập')
+                        if sendNoti >= 500:
                             if account.get("name"):
                                 send(f"Tài khoản {account.get('name')} không thể đăng nhập!")
-                            sendNoti = False
+                            sendNoti = 0
 
                         while not stop_event.is_set() and not global_theard_event.is_set():
                             if account is None:
@@ -131,7 +141,8 @@ def handleCrawlNewFeedVie(account, managerDriver ,dirextension = None, stop_even
                             checkLogin = loginInstance.loginFacebook(sendNoti)
                             if checkLogin == False:
                                 # updateSystemMessage(system_account,'Login thất bại')
-                                sendNoti = False
+                                sendNoti += 60
+                                newsfeed_process_instance.update_process(account.get('id'),'Đăng nhập thất bại, chờ 1p...')
                                 print('Đợi 1p rồi thử login lại!')
                                 sleep(60)
                             else:
@@ -142,7 +153,11 @@ def handleCrawlNewFeedVie(account, managerDriver ,dirextension = None, stop_even
                     except Exception as e:
                         raise e
                         
-                    sendNoti = True
+                    sendNoti = 500
+                    newsfeed_process_instance.update_process(account.get('id'),'Đăng nhập thành công')
+                    if sendNotiInfo:
+                        send(f"Tài khoản {account.get('name')} đăng nhập thành công!")
+                        sendNotiInfo = False
                     actions = ActionChains(browser)
                     
                     listPosts = browser.find_elements(By.XPATH, types['list_posts']) 

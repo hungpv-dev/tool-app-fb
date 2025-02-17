@@ -92,15 +92,7 @@ class Browser:
         try:
             if self.proxy:
                 chrome_options.add_extension(self.proxy)
-                # proxy = self.proxy
-                # seleniumwire_options['proxy'] = {
-                #     'http': f'http://{proxy["user"]}:{proxy["pass"]}@{proxy["ip"]}:{proxy["port"]}',
-                #     'https': f'http://{proxy["user"]}:{proxy["pass"]}@{proxy["ip"]}:{proxy["port"]}',
-                #     'no_proxy': 'localhost, 127.0.0.1'
-                # }
             service = Service(config('driver_path'))
-            # service = Service('./tools/chromedriver.exe')
-            # service = Service('./tools/chromedriver')
             driver = webdriver.Chrome(service=service, options=chrome_options)
 
             driver.set_page_load_timeout(120)
@@ -109,7 +101,6 @@ class Browser:
             return driver
         except Exception as e:
             logging.error(f"Error starting Chrome browser: {e}")
-            # messagebox.showerror('Lỗi','Vui lòng tải driver')
             print(f"Error starting Chrome browser: {e}")
             raise e
 
