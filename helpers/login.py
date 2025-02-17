@@ -46,7 +46,7 @@ class HandleLogin:
         try:
             logging.info(f"Bắt đầu thực khi login: {self.account.get('name')}")
             print(f"Bắt đầu thực khi login: {self.account.get('name')}")
-            self.driver.get("https://facebook.com")
+            self.driver.get("https://facebook.com/home.php")
             sleep(3)
             clickOk(self.driver)
 

@@ -205,6 +205,7 @@ def handleCrawlNewFeedVie(account, managerDriver ,dirextension = None, stop_even
                 
                     if len(listId) >= 20:
                         browser.refresh() 
+                        browser.get('https://facebook.com/home.php')
                         sleep(2)  
                         listId.clear() 
                         browser.execute_script("document.body.style.zoom='0.2';")
@@ -403,6 +404,7 @@ def handleCrawlNewFeed(account, name, dirextension = None,stop_event=None,system
                 
                     if len(listId) >= 20 or checkReload == True:
                         browser.refresh() 
+                        browser.get('https://facebook.com/home.php')
                         sleep(2)  
                         listId.clear() 
                         browser.execute_script("document.body.style.zoom='0.2';")
