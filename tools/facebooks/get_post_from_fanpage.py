@@ -19,7 +19,7 @@ def process_crawl(id, stop_event):
             manager = Browser('/crawl',None,'chrome',True)
             browser = manager.start()
             fanpage_process_instance.update_process(id,'Đang chuyển hướng đến facebook....')
-            browser.get("https://facebook.com")
+            browser.get("https://facebook.com/home.php")
             crawl = BrowserFanpage(browser)
             crawl.handle(id,stop_event)
         except Exception as e:

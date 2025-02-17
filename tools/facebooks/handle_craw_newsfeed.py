@@ -104,7 +104,7 @@ def handleCrawlNewFeedVie(account, managerDriver ,dirextension = None, stop_even
                 sendNoti = 500
                 newsfeed_process_instance.update_process(account.get('id'),'Đăng nhập thành công')
 
-                browser.get('https://facebook.com')
+                browser.get('https://facebook.com/home.php')
                 if process['status_vie'] == 1:
                     sleep(60)
                     process = newsfeed_process_instance.show(account.get('id'))
@@ -257,7 +257,7 @@ def handleCrawlNewFeed(account, name, dirextension = None,stop_event=None,system
                 
                 loginInstance = HandleLogin(browser,account,newsfeed_process_instance)
                 try:
-                    browser.get('https://facebook.com')
+                    browser.get('https://facebook.com/home.php')
                     sleep(1)
                     loginInstance.login()
                 except Exception as e:
@@ -295,7 +295,7 @@ def handleCrawlNewFeed(account, name, dirextension = None,stop_event=None,system
                         print("Trình duyệt đã bị đóng. Khởi chạy lại...")
                         manager = Browser(f"/newsfeed/{str(account_id)}/{str(uuid.uuid4())}", dirextension)
                         browser = manager.start()
-                        browser.get('https://facebook.com')
+                        browser.get('https://facebook.com/home.php')
                         try:
                             loginInstance = HandleLogin(browser,account)
                             loginInstance.login()
@@ -309,7 +309,7 @@ def handleCrawlNewFeed(account, name, dirextension = None,stop_event=None,system
                         logging.info(f"{name} chờ 3 phút để thử login lại")
                         print(f"{name} chờ 3 phút để thử login lại")
                         sleep(180)
-                        browser.get('https://facebook.com')
+                        browser.get('https://facebook.com/home.php')
                         sleep(1)
                         loginInstance = HandleLogin(browser,account)
                         loginInstance.setAccount()
@@ -451,7 +451,7 @@ def crawlNewFeed(account,name,dirextension,stop_event=None,system_account=None):
                 
                 loginInstance = HandleLogin(browser,account,newsfeed_process_instance)
                 try:
-                    browser.get('https://facebook.com')
+                    browser.get('https://facebook.com/home.php')
                     sleep(1)
                     loginInstance.login()
                 except Exception as e:
@@ -484,7 +484,7 @@ def crawlNewFeed(account,name,dirextension,stop_event=None,system_account=None):
                         print("Trình duyệt đã bị đóng. Khởi chạy lại...")
                         manager = Browser(f"/newsfeed/{str(account_id)}/{str(uuid.uuid4())}", dirextension)
                         browser = manager.start()
-                        browser.get('https://facebook.com')
+                        browser.get('https://facebook.com/home.php')
                         try:
                             loginInstance = HandleLogin(browser,account)
                             loginInstance.login()
@@ -497,7 +497,7 @@ def crawlNewFeed(account,name,dirextension,stop_event=None,system_account=None):
                         logging.info(f"{name} chờ 3 phút để thử login lại")
                         print(f"{name} chờ 3 phút để thử login lại")
                         sleep(180)
-                        browser.get('https://facebook.com')
+                        browser.get('https://facebook.com/home.php')
                         sleep(1)
                         loginInstance = HandleLogin(browser,account)
                         loginInstance.setAccount()

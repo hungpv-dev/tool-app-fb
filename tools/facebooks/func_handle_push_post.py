@@ -55,7 +55,7 @@ def push_page(page,account,dirextension,stop_event,system_account = None):
                     sleep(30)
 
             loginInstance = HandleLogin(browser,account)
-            browser.get('https://facebook.com')
+            browser.get('https://facebook.com/home.php')
             loginInstance.login(False)
 
             sleep(2)
@@ -77,7 +77,7 @@ def push_page(page,account,dirextension,stop_event,system_account = None):
                     print("Trình duyệt đã bị đóng. Khởi chạy lại...")
                     manager = Browser(f"/push/{account['id']}/{str(uuid.uuid4())}", dirextension, loadContent=True)
                     browser = manager.start()
-                    browser.get('https://facebook.com')
+                    browser.get('https://facebook.com/home.php')
                     try:
                         loginInstance.setAccount()
                         loginInstance.login()
@@ -225,7 +225,7 @@ def push_list(account, managerDriver, dirextension,stop_event,system_account = N
                     print("Trình duyệt đã bị đóng. Khởi chạy lại...")
                     manager = Browser(f"/push/{account['id']}/{str(uuid.uuid4())}", dirextension, loadContent=True)
                     browser = manager.start()
-                    browser.get('https://facebook.com')
+                    browser.get('https://facebook.com/home.php')
                     loginInstance.setAccount()
                     try:
                         loginInstance.login()

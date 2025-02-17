@@ -340,7 +340,7 @@ class HandleLogin:
         return self.saveLogin()
 
     def checkCurrent(self):
-        self.driver.get('https://facebook.com')
+        self.driver.get('https://facebook.com/home.php')
         sleep(3)
         check = False
         try:
@@ -455,7 +455,7 @@ class HandleLogin:
             
             if redirectHome:
                 sleep(1)
-                self.driver.get('https://facebook.com')
+                self.driver.get('https://facebook.com/home.php')
                 sleep(1)
 
         except Exception as e:

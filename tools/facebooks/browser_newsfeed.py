@@ -60,7 +60,7 @@ def process_newsfeed(account, stop_event):
             # browser.get('https://whatismyipaddress.com')
             # sleep(10000)
             newsfeed_process_instance.update_process(account.get('id'),'Chuyển hướng tới facebook')
-            browser.get("https://facebook.com")
+            browser.get("https://facebook.com/home.php")
             newfeed = CrawContentNewsfeed(browser,account,extension,manager,system_account)
             newfeed.handle(stop_event)
             sleep(5)

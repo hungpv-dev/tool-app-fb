@@ -51,7 +51,7 @@ def process_post(account,stop_event):
                 raise Exception("Proxy không hợp lệ")
         
             post_process_instance.update_process(account.get('id'),'Chuyển hướng tới fb')
-            browser.get("https://facebook.com")
+            browser.get("https://facebook.com/home.php")
             crawl = Push(browser,account,dirextension,manager,system_account)
             crawl.handle(stop_event)
             sleep(5)
