@@ -82,5 +82,5 @@ def main(url):
     relevant_html = extract_relevant_tags(main_div)
     print(relevant_html)
 # Truyền URL vào hàm main
-url = "https://news.megos.online/326004?utm_source=My1107&utm_medium=RappersMusic&utm_campaign=MediGo"  # Thay thế bằng URL bạn muốn phân tích
+url = "https://theirsearches.com/hearty-tuscan-white-bean-soup/"  # Thay thế bằng URL bạn muốn phân tích
 main(url)
